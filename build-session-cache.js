@@ -9,8 +9,8 @@ const initSqlJs = require('sql.js');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const { getAccountRoots } = require('./account-roots');
 
-const PROJECTS_DIR = path.join(process.env.HOME, '.claude', 'projects');
 const CACHE_PATH = process.argv[2] || path.join(__dirname, '.cache', 'sessions.db');
 
 // Statistics
@@ -57,6 +57,7 @@ function initDatabase() {
             total_cache_write_tokens INTEGER DEFAULT 0,
             tool_call_count INTEGER DEFAULT 0,
             git_branch TEXT,
+            account TEXT DEFAULT 'personal',
             FOREIGN KEY (file_id) REFERENCES files(id)
         )
     `);
@@ -76,6 +77,21 @@ function initDatabase() {
     db.run(`CREATE INDEX IF NOT EXISTS idx_files_project ON files(project_path)`);
     db.run(`CREATE INDEX IF NOT EXISTS idx_sessions_file_id ON sessions(file_id)`);
     db.run(`CREATE INDEX IF NOT EXISTS idx_sessions_timestamp ON sessions(start_timestamp)`);
+
+    // Migrate pre-existing caches that predate the account column.
+    migrateSchema();
+}
+
+/**
+ * Add columns to existing caches that predate newer schema versions.
+ * Idempotent: only adds the account column when it is missing.
+ */
+function migrateSchema() {
+    const cols = db.exec('PRAGMA table_info(sessions)');
+    const names = cols.length > 0 ? cols[0].values.map(row => row[1]) : [];
+    if (!names.includes('account')) {
+        db.run(`ALTER TABLE sessions ADD COLUMN account TEXT DEFAULT 'personal'`);
+    }
 }
 
 /**
@@ -146,7 +162,7 @@ function shouldProcessFile(filePath, currentStats) {
 /**
  * Parse JSONL session file and extract metadata
  */
-function parseSessionFile(filePath) {
+function parseSessionFile(filePath, account = 'personal') {
     const sessions = new Map();
     let lineCount = 0;
     let errors = 0;
@@ -173,6 +189,7 @@ function parseSessionFile(filePath) {
                     sessions.set(sessionId, {
                         session_id: sessionId,
                         agent_id: agentId,
+                        account: account,
                         message_count: 0,
                         total_input_tokens: 0,
                         total_output_tokens: 0,
@@ -238,7 +255,7 @@ function parseSessionFile(filePath) {
 /**
  * Process a single session file
  */
-function processFile(filePath, projectPath) {
+function processFile(filePath, projectPath, account = 'personal') {
     const fileStats = getFileStats(filePath);
     if (!fileStats) {
         stats.errorFiles++;
@@ -255,7 +272,7 @@ function processFile(filePath, projectPath) {
     }
 
     // Parse the file
-    const result = parseSessionFile(filePath);
+    const result = parseSessionFile(filePath, account);
 
     if (!result.success) {
         console.error(`  ❌ Error parsing ${filePath}: ${result.error}`);
@@ -296,11 +313,11 @@ function processFile(filePath, projectPath) {
         INSERT INTO sessions (
             file_id, session_id, agent_id, start_timestamp, end_timestamp,
             message_count, total_input_tokens, total_output_tokens,
-            total_cache_read_tokens, total_cache_write_tokens, tool_call_count, git_branch
+            total_cache_read_tokens, total_cache_write_tokens, tool_call_count, git_branch, account
         ) VALUES (
             :file_id, :session_id, :agent_id, :start_ts, :end_ts,
             :msg_count, :in_tokens, :out_tokens,
-            :cache_read, :cache_write, :tool_count, :git_branch
+            :cache_read, :cache_write, :tool_count, :git_branch, :account
         )
     `);
 
@@ -317,7 +334,8 @@ function processFile(filePath, projectPath) {
             ':cache_read': session.total_cache_read_tokens,
             ':cache_write': session.total_cache_write_tokens,
             ':tool_count': session.tool_call_count,
-            ':git_branch': session.git_branch
+            ':git_branch': session.git_branch,
+            ':account': session.account || account
         });
         stats.processedSessions++;
     }
@@ -332,34 +350,46 @@ function processFile(filePath, projectPath) {
 }
 
 /**
- * Scan and process all project directories
+ * Scan and process all project directories across every account root.
+ * Each account (personal, fho) is scanned in turn and its sessions are
+ * tagged with the account label. Accounts whose projects dir is missing or
+ * empty are skipped by the account-roots helper, so this never errors when
+ * an account (e.g. FHO) has no transcripts yet.
  */
 function scanProjects() {
-    if (!fs.existsSync(PROJECTS_DIR)) {
-        console.error(`❌ Projects directory not found: ${PROJECTS_DIR}`);
+    const accounts = getAccountRoots();
+
+    if (accounts.length === 0) {
+        console.error('❌ No account projects directories found to scan');
         process.exit(1);
     }
 
-    const projectDirs = fs.readdirSync(PROJECTS_DIR, { withFileTypes: true })
-        .filter(dirent => dirent.isDirectory())
-        .map(dirent => dirent.name);
-
-    console.log(`📁 Found ${projectDirs.length} project directories`);
+    console.log(`👤 Scanning ${accounts.length} account(s): ${accounts.map(a => a.label).join(', ')}`);
     console.log('');
 
-    for (const projectName of projectDirs) {
-        const projectPath = path.join(PROJECTS_DIR, projectName);
-        const sessionFiles = fs.readdirSync(projectPath)
-            .filter(f => f.endsWith('.jsonl'))
-            .map(f => path.join(projectPath, f));
+    for (const account of accounts) {
+        const projectsDir = account.projectsDir;
+        const projectDirs = fs.readdirSync(projectsDir, { withFileTypes: true })
+            .filter(dirent => dirent.isDirectory())
+            .map(dirent => dirent.name);
 
-        if (sessionFiles.length === 0) continue;
+        console.log(`📁 [${account.label}] Found ${projectDirs.length} project directories`);
 
-        console.log(`  📂 ${projectName} (${sessionFiles.length} files)`);
+        for (const projectName of projectDirs) {
+            const projectPath = path.join(projectsDir, projectName);
+            const sessionFiles = fs.readdirSync(projectPath)
+                .filter(f => f.endsWith('.jsonl'))
+                .map(f => path.join(projectPath, f));
 
-        for (const filePath of sessionFiles) {
-            processFile(filePath, projectName);
+            if (sessionFiles.length === 0) continue;
+
+            console.log(`  📂 ${projectName} (${sessionFiles.length} files)`);
+
+            for (const filePath of sessionFiles) {
+                processFile(filePath, projectName, account.label);
+            }
         }
+        console.log('');
     }
 }
 
@@ -418,7 +448,7 @@ function rebuildDailyStats() {
 async function main() {
     console.log('🗄️  Building Claude Code session cache...');
     console.log(`📁 Cache: ${CACHE_PATH}`);
-    console.log(`📁 Source: ${PROJECTS_DIR}`);
+    console.log(`📁 Source: ${getAccountRoots().map(a => `${a.label} → ${a.projectsDir}`).join(', ') || '(none)'}`);
     console.log('');
 
     // Ensure cache directory exists

@@ -125,6 +125,26 @@ describe('parseSessionFile', () => {
     expect(result.sessions[0].git_branch).toBe('feature/cool');
   });
 
+  it('tags each session with the supplied account label', () => {
+    const filePath = writeSessionFile([
+      { type: 'user', sessionId: 's1', timestamp: '2025-01-01T10:00:00Z' },
+      { type: 'user', sessionId: 's2', timestamp: '2025-01-01T10:00:00Z' },
+    ]);
+
+    const result = parseSessionFile(filePath, 'fho');
+    expect(result.sessions).toHaveLength(2);
+    expect(result.sessions.every(s => s.account === 'fho')).toBe(true);
+  });
+
+  it('defaults the account tag to personal when none is supplied', () => {
+    const filePath = writeSessionFile([
+      { type: 'user', sessionId: 's1', timestamp: '2025-01-01T10:00:00Z' },
+    ]);
+
+    const result = parseSessionFile(filePath);
+    expect(result.sessions[0].account).toBe('personal');
+  });
+
   it('skips non-message entry types', () => {
     const filePath = writeSessionFile([
       { type: 'system', sessionId: 's1', timestamp: '2025-01-01T10:00:00Z' },
