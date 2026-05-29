@@ -2,7 +2,7 @@
 # Claude Code Dashboard Server
 # Usage: ./serve.sh [port]
 
-PORT="${1:-8080}"
+PORT="${1:-8081}"
 HOST="claude-dashboard"
 URL="http://${HOST}:${PORT}"
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
