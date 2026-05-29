@@ -7,9 +7,11 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* ================================================================
-           SELF-HOSTED FONTS — loaded locally so rendering never depends on
-           Google Fonts CDN availability. Syne is a variable font (wght 400–800)
-           served from a single woff2 file. IBM Plex Mono is three static files.
+           SELF-HOSTED FONTS - loaded locally so rendering never depends on
+           a font CDN. IBM Plex Mono (three static woff2 files) is used for
+           labels and data values. Display headings use a Helvetica Neue
+           system stack (no download), which renders heavy weights at natural
+           proportions without the stretched look the previous Syne face had.
         ================================================================ */
         @font-face {
             font-family: 'IBM Plex Mono';
@@ -37,7 +39,7 @@
         }
         /* ================================================================
            DESIGN SYSTEM — My Claude Activity
-           Editorial. Monospaced data. Syne headings. Coral + Teal accents.
+           Editorial. Monospaced data. Helvetica Neue headings. Coral + Teal accents.
            Asymmetric grid. Light default with dark toggle.
         ================================================================ */
 
