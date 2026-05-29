@@ -20,3 +20,7 @@ data.json
 
 # Playwright MCP test artifacts
 .playwright-mcp/
+
+# Verification screenshots (generated during testing)
+screenshot-*.png
+screenshot-*.jpg
