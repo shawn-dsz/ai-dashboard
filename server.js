@@ -15,6 +15,7 @@ const { execFile } = require('child_process');
 
 const { readdir, readFile, stat } = require('fs/promises');
 const { execFileSync } = require('child_process');
+const { getAccountRoots } = require('./account-roots');
 
 const PORT = parseInt(process.argv[2] || '8080', 10);
 const BROKER_HOST = '127.0.0.1';
@@ -25,7 +26,14 @@ const ROOT = __dirname;
 const REMOTE_HOSTS = [
   { name: 'henry', ssh: 'henry', brokerPort: 7899 },
 ];
-const PROJECTS_DIR = path.join(process.env.HOME, '.claude', 'projects');
+// Account projects directories to search for session JSONL files. Falls
+// back to the single personal dir when the helper returns nothing (e.g. an
+// override that hides the default accounts), so enrichment never breaks.
+function getProjectsDirs() {
+  const roots = getAccountRoots();
+  if (roots.length > 0) return roots.map(r => r.projectsDir);
+  return [path.join(process.env.HOME, '.claude', 'projects')];
+}
 const SUPERSET_DIR = path.join(process.env.HOME, '.superset');
 const SUPERSET_DB = path.join(SUPERSET_DIR, 'local.db');
 const SUPERSET_STATE = path.join(SUPERSET_DIR, 'app-state.json');
@@ -198,7 +206,31 @@ async function enrichWithSupersetData(peers) {
  */
 async function getSessionInfo(cwd, sessionId) {
   const projectKey = cwd.replace(/\//g, '-');
-  const projectDir = path.join(PROJECTS_DIR, projectKey);
+
+  // The project directory may live under any account root. Pick the first
+  // account whose project directory exists; prefer one that holds the
+  // requested sessionId's JSONL when a sessionId is supplied.
+  let projectDir = null;
+  for (const baseDir of getProjectsDirs()) {
+    const candidate = path.join(baseDir, projectKey);
+    let exists = false;
+    try {
+      const s = await stat(candidate);
+      exists = s.isDirectory();
+    } catch { /* not in this account root */ }
+    if (!exists) continue;
+
+    if (sessionId) {
+      try {
+        await stat(path.join(candidate, sessionId + '.jsonl'));
+        projectDir = candidate; // exact session match, use this root
+        break;
+      } catch { /* sessionId not here, keep as a fallback */ }
+    }
+    if (!projectDir) projectDir = candidate; // first existing dir wins
+  }
+
+  if (!projectDir) return null;
 
   try {
     let targetFile = null;
