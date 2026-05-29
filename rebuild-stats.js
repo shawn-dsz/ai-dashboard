@@ -11,9 +11,79 @@ const initSqlJs = require('sql.js');
 const fs = require('fs');
 const path = require('path');
 
+const { getAccountRoots } = require('./account-roots');
+
 const CACHE_DB = process.argv[2] || path.join(__dirname, '.cache', 'sessions.db');
-const STATS_CACHE = path.join(process.env.HOME, '.claude', 'stats-cache.json');
-const OUTPUT = path.join(__dirname, 'data.json');
+const STATS_CACHE = process.env.DASHBOARD_STATS_CACHE
+    || path.join(process.env.HOME, '.claude', 'stats-cache.json');
+const ALT_STATS_CACHE = process.env.DASHBOARD_ALT_STATS_CACHE
+    || path.join(process.env.HOME, '.claude-alt', 'stats-cache.json');
+const OUTPUT = process.env.DASHBOARD_DATA_OUTPUT
+    || path.join(__dirname, 'data.json');
+
+/**
+ * Merge two stats-cache.json structures into one.
+ *
+ * Used to fold the FHO (~/.claude-alt) historical cache into the personal
+ * (~/.claude) cache so dailyActivity, hourCounts and model data span both
+ * accounts. dailyActivity is summed per date; hourCounts and modelUsage are
+ * summed per key; scalar totals are added; the earliest firstSessionDate
+ * wins. Only the historical merge matters here, because live sessions come
+ * from the SQLite cache downstream.
+ */
+function mergeStatsCaches(base, extra) {
+    const merged = Object.assign({}, base);
+
+    // dailyActivity: sum counts per date.
+    const dailyByDate = new Map();
+    for (const d of base.dailyActivity || []) {
+        dailyByDate.set(d.date, Object.assign({}, d));
+    }
+    for (const d of extra.dailyActivity || []) {
+        const cur = dailyByDate.get(d.date);
+        if (cur) {
+            cur.messageCount = (cur.messageCount || 0) + (d.messageCount || 0);
+            cur.sessionCount = (cur.sessionCount || 0) + (d.sessionCount || 0);
+            cur.toolCallCount = (cur.toolCallCount || 0) + (d.toolCallCount || 0);
+            cur.totalTokens = (cur.totalTokens || 0) + (d.totalTokens || 0);
+        } else {
+            dailyByDate.set(d.date, Object.assign({}, d));
+        }
+    }
+    merged.dailyActivity = Array.from(dailyByDate.values())
+        .sort((a, b) => a.date.localeCompare(b.date));
+
+    // hourCounts: sum per hour.
+    merged.hourCounts = Object.assign({}, base.hourCounts || {});
+    for (const [hour, count] of Object.entries(extra.hourCounts || {})) {
+        merged.hourCounts[hour] = (merged.hourCounts[hour] || 0) + count;
+    }
+
+    // modelUsage: sum per model.
+    merged.modelUsage = Object.assign({}, base.modelUsage || {});
+    for (const [model, count] of Object.entries(extra.modelUsage || {})) {
+        merged.modelUsage[model] = (merged.modelUsage[model] || 0) + count;
+    }
+
+    // dailyModelTokens: concatenate (kept as-is for downstream consumers).
+    merged.dailyModelTokens = [
+        ...(base.dailyModelTokens || []),
+        ...(extra.dailyModelTokens || []),
+    ];
+
+    // Scalars.
+    merged.totalSpeculationTimeSavedMs =
+        (base.totalSpeculationTimeSavedMs || 0) + (extra.totalSpeculationTimeSavedMs || 0);
+
+    // Earliest first-session date wins.
+    if (extra.firstSessionDate) {
+        merged.firstSessionDate = base.firstSessionDate
+            ? (extra.firstSessionDate < base.firstSessionDate ? extra.firstSessionDate : base.firstSessionDate)
+            : extra.firstSessionDate;
+    }
+
+    return merged;
+}
 
 async function main() {
     if (!fs.existsSync(CACHE_DB)) {
@@ -25,13 +95,26 @@ async function main() {
     const dbBuffer = fs.readFileSync(CACHE_DB);
     const db = new SQL.Database(dbBuffer);
 
-    // Load existing stats-cache for model-specific data we cannot derive
+    // Load existing stats-cache for model-specific data we cannot derive.
+    // The personal cache (~/.claude) is the base; the FHO cache
+    // (~/.claude-alt) is merged on top when present. FHO has no cache
+    // today, so the missing case is handled gracefully (no error).
     let existing = {};
     if (fs.existsSync(STATS_CACHE)) {
         try {
             existing = JSON.parse(fs.readFileSync(STATS_CACHE, 'utf8'));
         } catch (e) {
             console.warn('⚠️  Could not parse existing stats-cache.json, starting fresh');
+        }
+    }
+
+    if (fs.existsSync(ALT_STATS_CACHE)) {
+        try {
+            const altExisting = JSON.parse(fs.readFileSync(ALT_STATS_CACHE, 'utf8'));
+            existing = mergeStatsCaches(existing, altExisting);
+            console.log('   🔀 Merged FHO stats-cache.json');
+        } catch (e) {
+            console.warn('⚠️  Could not parse FHO stats-cache.json, skipping');
         }
     }
 
@@ -64,6 +147,35 @@ async function main() {
     `);
     const totalSessions = totalsResult[0]?.values[0]?.[0] || 0;
     const totalMessages = totalsResult[0]?.values[0]?.[1] || 0;
+
+    // Per-account totals from the DB, keyed by account label. Every known
+    // account is represented (zero-filled) so the dashboard can render a
+    // stable personal/FHO filter even before FHO has any sessions.
+    const accountAgg = db.exec(`
+        SELECT
+            COALESCE(account, 'personal') as account,
+            COUNT(*) as totalSessions,
+            COALESCE(SUM(message_count), 0) as totalMessages,
+            COALESCE(SUM(total_input_tokens + total_output_tokens + total_cache_read_tokens + total_cache_write_tokens), 0) as totalTokens,
+            COALESCE(SUM(tool_call_count), 0) as totalToolCalls
+        FROM sessions
+        GROUP BY COALESCE(account, 'personal')
+    `);
+
+    const byAccount = {};
+    for (const acct of getAccountRoots()) {
+        byAccount[acct.label] = { totalSessions: 0, totalMessages: 0, totalTokens: 0, totalToolCalls: 0 };
+    }
+    if (accountAgg.length > 0) {
+        for (const row of accountAgg[0].values) {
+            byAccount[row[0]] = {
+                totalSessions: row[1],
+                totalMessages: row[2],
+                totalTokens: row[3],
+                totalToolCalls: row[4],
+            };
+        }
+    }
 
     // Hour counts from session start times
     const hourRows = db.exec(`
@@ -153,6 +265,7 @@ async function main() {
         modelUsage: existing.modelUsage || {},
         totalSessions: mergedTotalSessions,
         totalMessages: mergedTotalMessages,
+        byAccount,
         longestSession,
         firstSessionDate: mergedFirstSessionDate,
         hourCounts: mergedHourCounts,

@@ -4,6 +4,9 @@
 
 set -e
 
+# Default projects dir for the primary (personal) account. Account roots
+# are resolved inside build-session-cache.js via account-roots.js, which
+# also handles the FHO account and any DASHBOARD_ACCOUNT_ROOTS override.
 PROJECTS_DIR="$HOME/.claude/projects"
 DEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CACHE_DB="$DEST_DIR/.cache/sessions.db"
@@ -12,8 +15,9 @@ CACHE_SCRIPT="$DEST_DIR/build-session-cache.js"
 echo "📊 Aggregating Claude Code data..."
 echo ""
 
-# Check if projects directory exists
-if [ ! -d "$PROJECTS_DIR" ]; then
+# Sanity check: the primary account projects directory should exist unless a
+# custom DASHBOARD_ACCOUNT_ROOTS override is in use.
+if [ -z "$DASHBOARD_ACCOUNT_ROOTS" ] && [ ! -d "$PROJECTS_DIR" ]; then
     echo "❌ Error: $PROJECTS_DIR not found"
     echo "   Make sure you've used Claude Code at least once."
     exit 1
@@ -78,7 +82,8 @@ sqlite3 -json "$CACHE_DB" "
         s.end_timestamp as endTime,
         s.message_count as messageCount,
         s.total_input_tokens + s.total_output_tokens + s.total_cache_read_tokens + s.total_cache_write_tokens as totalTokens,
-        s.git_branch as gitBranch
+        s.git_branch as gitBranch,
+        COALESCE(s.account, 'personal') as account
     FROM sessions s
     JOIN files f ON s.file_id = f.id
     WHERE s.start_timestamp IS NOT NULL
