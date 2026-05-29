@@ -4,429 +4,630 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Claude Activity</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* ================================================================
-           DESIGN SYSTEM — Claude Activity Dashboard
-           Clean data journalism aesthetic. Single coral accent.
-           No gradient hero blobs. Heatmap overflow fixed.
+           DESIGN SYSTEM — My Claude Activity
+           Editorial. Monospaced data. Syne headings. Coral + Teal accents.
+           Asymmetric grid. Light default with dark toggle.
         ================================================================ */
 
         :root {
-            --bg:        #F5F4F1;
-            --bg-card:   #FFFFFF;
-            --bg-raised: #FAFAF8;
-            --bg-inset:  #EFEDE8;
+            /* Palette — light */
+            --bg:          #F6F5F2;
+            --bg-card:     #FFFFFF;
+            --bg-raised:   #FAFAF8;
+            --bg-inset:    #EEEDE9;
+            --bg-hero:     #111111;
 
-            --ink:       #111111;
-            --ink-2:     #555555;
-            --ink-3:     #888888;
-            --ink-4:     #BBBBBB;
-            --ink-inv:   #FFFFFF;
+            --ink:         #0F0F0F;
+            --ink-2:       #4A4A4A;
+            --ink-3:       #888880;
+            --ink-4:       #BBBBBB;
+            --ink-inv:     #FFFFFF;
 
-            --red:       #C94F3A;
-            --red-soft:  #F2E8E6;
-            --teal:      #2A9494;
-            --amber:     #2A7A9A;
+            /* Accents */
+            --coral:       #C94F3A;
+            --coral-light: #F0E0DC;
+            --coral-mid:   #E07060;
+            --teal:        #1D8A8A;
+            --teal-light:  #E0F0F0;
+            --amber:       #B07020;
+            --amber-light: #F0EBD8;
 
-            --line:      #E4E2DD;
-            --line-2:    #D4D2CC;
-            --grid-clr:  #EEECE7;
+            /* Borders / dividers */
+            --line:        #E4E2DD;
+            --line-2:      #D0CEC8;
 
-            --sh-sm: 0 1px 2px rgba(0,0,0,.05), 0 1px 4px rgba(0,0,0,.04);
-            --sh-md: 0 2px 6px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04);
+            /* Shadows */
+            --sh-xs: 0 1px 2px rgba(0,0,0,.04);
+            --sh-sm: 0 1px 4px rgba(0,0,0,.06), 0 2px 6px rgba(0,0,0,.04);
+            --sh-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
+            --sh-lg: 0 8px 32px rgba(0,0,0,.10), 0 2px 8px rgba(0,0,0,.06);
 
-            --r: 6px;
-            --gap: 14px;
+            /* Geometry */
+            --r:           8px;
+            --r-lg:        12px;
+            --gap:         16px;
 
-            /* legacy compat — used by dashboard-common.js chart colours */
-            --accent: #C94F3A;
-            --accent-light: #E07060;
-            --bg-primary: #F5F4F1;
-            --bg-secondary: #EFEDE8;
-            --bg-elevated: #FFFFFF;
-            --bg-tooltip: #1A1A1A;
-            --text-primary: #111111;
-            --text-secondary: #555555;
-            --text-tertiary: #888888;
-            --text-muted: #BBBBBB;
-            --text-inverse: #FFFFFF;
-            --border: #E4E2DD;
-            --border-subtle: #EEECE7;
-            --border-medium: #D4D2CC;
-            --shadow: rgba(0,0,0,.06);
-            --shadow-sm: 0 1px 2px rgba(0,0,0,.05);
-            --shadow-md: 0 2px 6px rgba(0,0,0,.06);
-            --grid: #EEECE7;
-            --overlay: rgba(0,0,0,.4);
-            --shadow-tooltip: rgba(0,0,0,.5);
+            /* Type scale */
+            --text-xs:  .688rem;
+            --text-sm:  .813rem;
+            --text-base: 1rem;
+            --text-md:  1.125rem;
+            --text-lg:  1.375rem;
+            --text-xl:  1.75rem;
+            --text-2xl: 2.25rem;
+            --text-3xl: 3rem;
 
-            /* spacing */
-            --space-1:.25rem; --space-2:.5rem; --space-3:.75rem;
-            --space-4:1rem;   --space-5:1.25rem; --space-6:1.5rem;
-            --space-8:2rem;
-
-            /* radii */
-            --radius-sm:4px; --radius-md:6px; --radius-lg:10px;
-            --radius-xl:16px; --radius-full:9999px;
-
-            /* type */
-            --text-xs:.688rem; --text-sm:.813rem; --text-base:1rem;
-            --text-md:1.125rem; --text-lg:1.375rem; --text-xl:1.75rem;
-            --text-2xl:2.25rem; --text-3xl:3rem;
-
-            /* gradients (kept for compat, not used on cards) */
-            --gradient-warm: linear-gradient(135deg,#C94F3A,#E07060);
-            --gradient-cool: linear-gradient(135deg,#2A9494,#3DBDBD);
-            --gradient-hero: linear-gradient(135deg,#C94F3A,#2A9494);
-
-            /* accent aliases */
-            --accent-primary: #C94F3A;
-            --accent-secondary: #2A9494;
-            --accent-tertiary: #2A7A9A;
-            --accent-primary-light: #F2E8E6;
-            --accent-secondary-light: #E4F0F0;
-            --accent-tertiary-light: #F4EDE4;
+            /* Legacy aliases for dashboard-common.js */
+            --accent:              #C94F3A;
+            --accent-light:        #E07060;
+            --bg-primary:          #F6F5F2;
+            --bg-secondary:        #EEEDE9;
+            --bg-elevated:         #FFFFFF;
+            --bg-tooltip:          #111111;
+            --text-primary:        #0F0F0F;
+            --text-secondary:      #4A4A4A;
+            --text-tertiary:       #888880;
+            --text-muted:          #BBBBBB;
+            --text-inverse:        #FFFFFF;
+            --border:              #E4E2DD;
+            --border-subtle:       #EEEDE9;
+            --border-medium:       #D0CEC8;
+            --shadow:              rgba(0,0,0,.06);
+            --shadow-sm:           0 1px 4px rgba(0,0,0,.06);
+            --shadow-md:           0 4px 12px rgba(0,0,0,.08);
+            --grid:                #E8E6E1;
+            --overlay:             rgba(0,0,0,.45);
+            --shadow-tooltip:      rgba(0,0,0,.5);
+            --red:                 #C94F3A;
+            --red-soft:            #F0E0DC;
+            --accent-primary:      #C94F3A;
+            --accent-secondary:    #1D8A8A;
+            --accent-tertiary:     #B07020;
+            --accent-primary-light:   #F0E0DC;
+            --accent-secondary-light: #E0F0F0;
+            --accent-tertiary-light:  #F0EBD8;
         }
 
         [data-theme="dark"] {
-            --bg:        #121212;
-            --bg-card:   #1C1C1C;
-            --bg-raised: #222222;
-            --bg-inset:  #181818;
+            --bg:          #111111;
+            --bg-card:     #1A1A1A;
+            --bg-raised:   #202020;
+            --bg-inset:    #161616;
+            --bg-hero:     #0A0A0A;
 
-            --ink:       #F0EFEC;
-            --ink-2:     #999994;
-            --ink-3:     #666662;
-            --ink-4:     #444440;
-            --ink-inv:   #121212;
+            --ink:         #F0EFEC;
+            --ink-2:       #9A9992;
+            --ink-3:       #666660;
+            --ink-4:       #3A3A38;
+            --ink-inv:     #111111;
 
-            --red:       #E06050;
-            --teal:      #3ABEBE;
+            --coral:       #E06050;
+            --coral-light: #2A1816;
+            --coral-mid:   #F08070;
+            --teal:        #3ABEBE;
+            --teal-light:  #152222;
+            --amber:       #D09030;
+            --amber-light: #241C0A;
 
-            --line:      #2C2C2C;
-            --line-2:    #3C3C3C;
-            --grid-clr:  #282828;
+            --line:        #2A2A2A;
+            --line-2:      #3A3A3A;
 
-            --sh-sm: 0 1px 3px rgba(0,0,0,.4);
-            --sh-md: 0 2px 8px rgba(0,0,0,.5);
+            --sh-xs: 0 1px 2px rgba(0,0,0,.3);
+            --sh-sm: 0 1px 4px rgba(0,0,0,.4);
+            --sh-md: 0 4px 12px rgba(0,0,0,.5);
+            --sh-lg: 0 8px 32px rgba(0,0,0,.6);
 
-            /* legacy compat */
-            --accent: #E06050;
-            --accent-light: #F08070;
-            --bg-primary: #121212;
-            --bg-secondary: #181818;
-            --bg-card: #1C1C1C;
-            --bg-elevated: #222222;
-            --bg-tooltip: #2A2A2A;
-            --text-primary: #F0EFEC;
-            --text-secondary: #999994;
-            --text-tertiary: #666662;
-            --text-muted: #444440;
-            --text-inverse: #121212;
-            --border: #2C2C2C;
-            --border-subtle: #242424;
-            --border-medium: #3C3C3C;
-            --shadow: rgba(0,0,0,.5);
-            --shadow-sm: 0 1px 3px rgba(0,0,0,.4);
-            --shadow-md: 0 2px 8px rgba(0,0,0,.5);
-            --grid: #282828;
-            --overlay: rgba(0,0,0,.7);
-            --shadow-tooltip: rgba(0,0,0,.8);
-            --accent-primary: #E06050;
-            --accent-secondary: #3ABEBE;
-            --accent-tertiary: #E09040;
-            --accent-primary-light: #2D1E1C;
-            --accent-secondary-light: #162626;
-            --accent-tertiary-light: #2D2018;
-            --red-soft: #2D1E1C;
+            /* Legacy aliases */
+            --accent:              #E06050;
+            --accent-light:        #F08070;
+            --bg-primary:          #111111;
+            --bg-secondary:        #161616;
+            --bg-elevated:         #1A1A1A;
+            --bg-tooltip:          #202020;
+            --text-primary:        #F0EFEC;
+            --text-secondary:      #9A9992;
+            --text-tertiary:       #666660;
+            --text-muted:          #3A3A38;
+            --text-inverse:        #111111;
+            --border:              #2A2A2A;
+            --border-subtle:       #1E1E1E;
+            --border-medium:       #3A3A3A;
+            --shadow:              rgba(0,0,0,.5);
+            --shadow-sm:           0 1px 4px rgba(0,0,0,.4);
+            --shadow-md:           0 4px 12px rgba(0,0,0,.5);
+            --grid:                #242420;
+            --overlay:             rgba(0,0,0,.7);
+            --shadow-tooltip:      rgba(0,0,0,.8);
+            --red:                 #E06050;
+            --red-soft:            #2A1816;
+            --accent-primary:      #E06050;
+            --accent-secondary:    #3ABEBE;
+            --accent-tertiary:     #D09030;
+            --accent-primary-light:   #2A1816;
+            --accent-secondary-light: #152222;
+            --accent-tertiary-light:  #241C0A;
         }
 
+        /* ================================================================
+           BASE
+        ================================================================ */
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+        html { scroll-behavior: smooth; }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            font-family: 'Syne', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg);
             color: var(--ink);
             min-height: 100vh;
-            padding: 32px 20px 60px;
+            padding: 0 0 80px;
             line-height: 1.5;
             -webkit-font-smoothing: antialiased;
         }
 
-        .container { max-width: 1200px; margin: 0 auto; }
+        /* ================================================================
+           LAYOUT
+        ================================================================ */
+        .page-wrap { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
 
-        /* ---- HEADER ---- */
-        .header {
+        @media (max-width: 640px) { .page-wrap { padding: 0 16px; } }
+
+        /* ================================================================
+           TOP BAR
+        ================================================================ */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--bg);
+            border-bottom: 1px solid var(--line);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        .topbar-inner {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+            height: 56px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 28px;
+            gap: 16px;
         }
-
-        .header-brand { display: flex; align-items: center; gap: 10px; }
-        .logo-mark { font-size: 22px; line-height: 1; }
-        .logo-text h1 {
-            font-size: 1.25rem;
-            font-weight: 700;
+        .topbar-brand {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+        }
+        .topbar-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
             color: var(--ink);
-            letter-spacing: -0.02em;
         }
-        .header-icon { display: none; }
+        .topbar-title span { color: var(--coral); }
+        .topbar-sub {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .688rem;
+            color: var(--ink-3);
+            letter-spacing: .04em;
+        }
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-        h1 { font-size: 1.25rem; font-weight: 700; color: var(--ink); }
-        h1 .wrapped { color: var(--red); }
-
-        .theme-toggle {
-            background: var(--bg-card);
+        /* Account filter */
+        .account-filter {
+            display: flex;
+            background: var(--bg-inset);
+            border-radius: 8px;
             border: 1px solid var(--line);
-            border-radius: var(--radius-full);
-            width: 36px; height: 36px;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; font-size: 16px;
-            transition: background .15s, border-color .15s;
-            box-shadow: var(--sh-sm);
+            padding: 3px;
+            gap: 2px;
+        }
+        .account-btn {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .7rem;
+            font-weight: 500;
+            letter-spacing: .03em;
+            padding: 5px 12px;
+            border: none;
+            background: none;
+            color: var(--ink-3);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background .15s, color .15s;
+            white-space: nowrap;
+        }
+        .account-btn.active {
+            background: var(--bg-card);
+            color: var(--ink);
+            box-shadow: var(--sh-xs);
+            font-weight: 600;
+        }
+        .account-btn.disabled-fho {
+            opacity: 0.45;
+            cursor: default;
+        }
+        .account-btn.disabled-fho:hover { background: none; color: var(--ink-3); }
+
+        /* Theme toggle */
+        .theme-toggle {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid var(--line);
+            background: var(--bg-card);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 15px;
+            transition: background .15s, border-color .15s, transform .1s;
+            box-shadow: var(--sh-xs);
             color: var(--ink-2);
             flex-shrink: 0;
         }
         .theme-toggle:hover { background: var(--bg-inset); border-color: var(--line-2); }
-        .theme-toggle:active { transform: scale(.95); }
+        .theme-toggle:active { transform: scale(.9); }
 
-        /* ---- GRID SYSTEM ---- */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: var(--gap);
-            margin-bottom: var(--gap);
+        /* Live agents link */
+        .agents-link {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .7rem;
+            font-weight: 600;
+            letter-spacing: .04em;
+            color: var(--ink-3);
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--line);
+            background: var(--bg-card);
+            transition: all .15s;
         }
-        .grid-3 { grid-template-columns: repeat(3, 1fr); }
-        .grid-4 { grid-template-columns: repeat(4, 1fr); }
-        .grid-5 { grid-template-columns: repeat(5, 1fr); }
-        .full-width { grid-column: 1 / -1; }
+        .agents-link:hover { color: var(--coral); border-color: var(--coral-light); background: var(--coral-light); }
 
-        /* ---- CARD ---- */
+        /* ================================================================
+           HERO BANNER — editorial black strip
+        ================================================================ */
+        .hero-banner {
+            background: var(--bg-hero);
+            color: var(--ink-inv);
+            padding: 40px 24px 36px;
+            margin-bottom: 0;
+        }
+        .hero-inner {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+        .hero-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .688rem;
+            font-weight: 500;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,.4);
+            margin-bottom: 14px;
+        }
+        .hero-headline {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(1.6rem, 3.5vw, 2.5rem);
+            font-weight: 800;
+            line-height: 1.15;
+            letter-spacing: -0.03em;
+            color: #FFFFFF;
+            max-width: 640px;
+            margin-bottom: 28px;
+        }
+        .hero-headline .hl { color: var(--coral); }
+        .hero-headline .hl-teal { color: #5DDEDE; }
+
+        /* Hero KPI strip */
+        .hero-kpis {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1px;
+            background: rgba(255,255,255,.08);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,.08);
+        }
+        .hero-kpi {
+            padding: 18px 20px;
+            background: rgba(255,255,255,.04);
+            transition: background .2s;
+        }
+        .hero-kpi:hover { background: rgba(255,255,255,.08); }
+        .hero-kpi-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .625rem;
+            font-weight: 500;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,.35);
+            margin-bottom: 8px;
+        }
+        .hero-kpi-value {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(1.5rem, 2.5vw, 2rem);
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            line-height: 1;
+            color: #FFFFFF;
+            font-variant-numeric: tabular-nums;
+        }
+        .hero-kpi-value.coral { color: #FF8070; }
+        .hero-kpi-value.teal  { color: #5DDEDE; }
+        .hero-kpi-sub {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .625rem;
+            color: rgba(255,255,255,.28);
+            margin-top: 5px;
+        }
+
+        /* Sparkline in hero */
+        .hero-sparkline {
+            grid-column: span 2;
+            padding: 18px 20px;
+        }
+        .sparkline-canvas-wrap {
+            position: relative;
+            height: 48px;
+            margin-top: 4px;
+        }
+
+        /* ================================================================
+           SECTION STRUCTURE
+        ================================================================ */
+        .section {
+            padding: 32px 0 0;
+        }
+        .section-header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .section-title {
+            font-family: 'Syne', sans-serif;
+            font-size: .75rem;
+            font-weight: 700;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--ink-3);
+        }
+        .section-title-main {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.125rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--ink);
+        }
+        .section-aside {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .688rem;
+            color: var(--ink-3);
+        }
+
+        /* ================================================================
+           CARD
+        ================================================================ */
         .card {
             background: var(--bg-card);
             border: 1px solid var(--line);
             border-radius: var(--r);
-            padding: 18px 20px;
-            box-shadow: var(--sh-sm);
-            transition: box-shadow .15s, border-color .15s;
+            padding: 20px 22px;
+            box-shadow: var(--sh-xs);
+            transition: box-shadow .2s, border-color .2s, transform .2s;
         }
         .card:hover {
-            border-color: var(--line-2);
             box-shadow: var(--sh-md);
+            border-color: var(--line-2);
+            transform: translateY(-1px);
         }
 
-        .card-label {
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: .08em;
+        /* Stat card (compact stat) */
+        .stat-card {
+            padding: 18px 20px;
+        }
+        .stat-card-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .625rem;
+            font-weight: 500;
+            letter-spacing: .1em;
             text-transform: uppercase;
             color: var(--ink-3);
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
-        .card-label-expandable {
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: .05em;
-            text-transform: uppercase;
-            color: var(--red);
-            margin-bottom: 6px;
-        }
-        .card-value {
-            font-size: 2rem;
+        .stat-card-value {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.75rem;
             font-weight: 800;
+            letter-spacing: -0.04em;
             color: var(--ink);
-            letter-spacing: -.03em;
-            font-variant-numeric: tabular-nums;
-            line-height: 1.1;
-        }
-        .card-value.accent { color: var(--red); }
-        .card-subtext { font-size: .8125rem; color: var(--ink-3); margin-top: 4px; }
-        .card-subtext.dark { color: var(--ink-2); }
-
-        /* ---- HERO CARDS (sessions / messages) ---- */
-        .hero-grid { grid-template-columns: repeat(2, 1fr); }
-
-        .hero-card {
-            border-left: 3px solid var(--red);
-            padding: 22px 24px;
-        }
-        .hero-card .card-label { margin-bottom: 6px; }
-        .hero-value {
-            font-size: clamp(2rem, 4vw, 2.75rem);
-            font-weight: 800;
-            color: var(--ink);
-            letter-spacing: -.04em;
-            font-variant-numeric: tabular-nums;
             line-height: 1;
-            margin: 4px 0 6px;
-        }
-        .hero-card .card-subtext { color: var(--ink-4); font-size: .75rem; }
-
-        /* ---- TOKEN BREAKDOWN ---- */
-        .token-breakdown {
-            margin-bottom: var(--gap);
-        }
-        .token-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            margin-bottom: 14px;
-        }
-        .token-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-        }
-        .token-metric {
-            background: var(--bg-inset);
-            border-radius: 4px;
-            padding: 10px 12px;
-            border: 1px solid var(--line);
-        }
-        .token-label {
-            font-size: 9px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: .07em;
-            color: var(--ink-3);
-            margin-bottom: 5px;
-        }
-        .token-value {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--ink);
             font-variant-numeric: tabular-nums;
-            letter-spacing: -.02em;
         }
-
-        /* ---- COMPACT STAT CARDS ---- */
-        .compact-grid { gap: var(--gap); margin-bottom: var(--gap); }
-        .compact-card {
-            padding: 16px;
-            text-align: center;
-        }
-        .compact-icon { font-size: 18px; margin-bottom: 6px; }
-        .compact-value {
-            font-size: 1.375rem;
-            font-weight: 800;
-            color: var(--red);
-            letter-spacing: -.02em;
-            font-variant-numeric: tabular-nums;
-            line-height: 1.2;
-            margin-bottom: 4px;
-        }
-        .compact-label {
-            font-size: 9px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: .07em;
+        .stat-card-value.coral { color: var(--coral); }
+        .stat-card-value.teal  { color: var(--teal); }
+        .stat-card-sub {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .625rem;
             color: var(--ink-3);
-        }
-
-        /* ---- PROGRESS BAR ---- */
-        .progress-bar {
-            background: var(--bg-inset);
-            height: 6px;
-            border-radius: 3px;
-            overflow: hidden;
-            margin: 10px 0;
-        }
-        .progress-fill {
-            height: 100%;
-            background: var(--red);
-            border-radius: 3px;
-            transition: width .8s ease-out;
-        }
-        .metrics-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: .8125rem;
             margin-top: 6px;
         }
-        .metrics-row span:first-child { color: var(--ink-2); }
-        .metrics-row span:last-child, .cache-metric-value {
-            color: var(--ink);
+        .stat-card-trend {
+            font-size: .688rem;
             font-weight: 600;
-            font-variant-numeric: tabular-nums;
+            margin-top: 4px;
         }
+        .stat-card-trend.up   { color: var(--teal); }
+        .stat-card-trend.down { color: var(--coral); }
 
-        /* ---- TOKEN BARS ---- */
-        .token-bar { display: flex; align-items: center; margin: 5px 0; }
-        .token-bar-label { width: 90px; font-size: .75rem; color: var(--ink-2); }
-        .token-bar-track {
-            flex: 1;
-            height: 6px;
+        /* Accent left border variant */
+        .card-accent-coral { border-left: 3px solid var(--coral); }
+        .card-accent-teal  { border-left: 3px solid var(--teal); }
+
+        /* ================================================================
+           GRIDS
+        ================================================================ */
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--gap); }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap); }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--gap); }
+        .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--gap); }
+        .full { grid-column: 1 / -1; }
+
+        /* Asymmetric layouts */
+        .grid-6-4   { display: grid; grid-template-columns: 3fr 2fr; gap: var(--gap); }
+        .grid-7-5   { display: grid; grid-template-columns: 7fr 5fr; gap: var(--gap); }
+        .grid-8-4   { display: grid; grid-template-columns: 2fr 1fr; gap: var(--gap); }
+
+        /* ================================================================
+           CHART CARD
+        ================================================================ */
+        .chart-card {
+            background: var(--bg-card);
+            border: 1px solid var(--line);
+            border-radius: var(--r);
+            padding: 20px 22px;
+            box-shadow: var(--sh-xs);
+            transition: box-shadow .2s, border-color .2s;
+        }
+        .chart-card:hover { box-shadow: var(--sh-sm); border-color: var(--line-2); }
+        .chart-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .chart-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .625rem;
+            font-weight: 600;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--ink-3);
+        }
+        .chart-value-pill {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .688rem;
+            font-weight: 600;
+            color: var(--coral);
+            background: var(--coral-light);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+        [data-theme="dark"] .chart-value-pill { background: var(--coral-light); }
+        .chart-container { position: relative; height: 220px; }
+        .chart-container-sm { position: relative; height: 160px; }
+        .chart-container-lg { position: relative; height: 280px; }
+
+        /* ================================================================
+           PROGRESS BAR
+        ================================================================ */
+        .prog-bar {
             background: var(--bg-inset);
+            height: 5px;
             border-radius: 3px;
             overflow: hidden;
-            margin: 0 8px;
+            margin: 10px 0 6px;
         }
-        .token-bar-fill { height: 100%; border-radius: 3px; transition: width .7s ease-out; }
-        .token-bar-fill.input  { background: var(--red); }
-        .token-bar-fill.output { background: var(--accent-light, #E07060); }
-        .token-bar-fill.cache-read  { background: var(--teal); opacity: .7; }
-        .token-bar-fill.cache-write { background: var(--teal); opacity: .4; }
-        .token-bar-value {
-            width: 70px;
-            text-align: right;
-            font-size: .75rem;
-            font-weight: 600;
-            color: var(--ink);
-            font-variant-numeric: tabular-nums;
+        .prog-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
+        .prog-fill.coral { background: var(--coral); }
+        .prog-fill.teal  { background: var(--teal); }
 
-        /* ---- MODEL ITEM ---- */
-        .model-item { padding: 10px 0; border-bottom: 1px solid var(--line); }
-        .model-item:last-child { border-bottom: none; }
-        .model-header {
+        /* ================================================================
+           DATA TABLE ROWS
+        ================================================================ */
+        .data-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 6px;
+            padding: 9px 0;
+            border-bottom: 1px solid var(--line);
         }
-        .model-name { font-weight: 600; font-size: .875rem; color: var(--ink); }
-        .model-tokens { color: var(--red); font-weight: 700; font-size: .875rem; font-variant-numeric: tabular-nums; }
-
-        /* ---- WEEKLY ACTIVITY CHART ---- */
-        .weekly-chart {
-            display: flex;
-            align-items: flex-end;
-            gap: 5px;
-            height: 72px;
-            padding-bottom: 20px;
-            margin-top: 10px;
+        .data-row:last-child { border-bottom: none; }
+        .data-row-label {
+            font-size: .813rem;
+            color: var(--ink-2);
         }
-        .weekly-chart .bar {
-            flex: 1;
-            background: var(--red);
-            border-radius: 2px 2px 0 0;
-            min-height: 2px;
-            position: relative;
-            opacity: .65;
-            transition: opacity .15s;
-        }
-        .weekly-chart .bar:hover { opacity: 1; }
-        .weekly-chart .bar-label {
-            position: absolute;
-            bottom: -18px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 9px;
+        .data-row-value {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .813rem;
             font-weight: 600;
+            color: var(--ink);
+            font-variant-numeric: tabular-nums;
+        }
+        .data-row-value.coral { color: var(--coral); }
+        .data-row-value.teal  { color: var(--teal); }
+
+        /* Token bar */
+        .token-bar-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 0;
+        }
+        .token-bar-lbl {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .625rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: .06em;
             color: var(--ink-3);
+            width: 80px;
+            flex-shrink: 0;
+        }
+        .token-bar-track {
+            flex: 1;
+            height: 5px;
+            background: var(--bg-inset);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .token-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .token-bar-fill.input  { background: var(--coral); }
+        .token-bar-fill.output { background: var(--coral-mid); opacity: .7; }
+        .token-bar-fill.cache-r { background: var(--teal); }
+        .token-bar-fill.cache-w { background: var(--teal); opacity: .45; }
+        .token-bar-val {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .688rem;
+            font-weight: 600;
+            color: var(--ink);
+            text-align: right;
+            width: 56px;
+            font-variant-numeric: tabular-nums;
+            flex-shrink: 0;
         }
 
-        /* ---- HEATMAP ---- */
-        .heatmap-container {
-            display: flex;
-            gap: 6px;
-            margin-top: 10px;
-            overflow-x: auto;          /* KEY FIX: scroll, don't expand */
+        /* ================================================================
+           HEATMAP
+        ================================================================ */
+        .heatmap-wrap {
+            overflow-x: auto;
             overflow-y: hidden;
             padding-bottom: 4px;
+            display: flex;
+            gap: 6px;
+            margin-top: 12px;
         }
         .heatmap-day-labels {
             display: flex;
@@ -436,7 +637,8 @@
             flex-shrink: 0;
         }
         .heatmap-day-labels span {
-            font-size: 9px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 8px;
             color: var(--ink-4);
             height: 11px;
             line-height: 11px;
@@ -455,369 +657,516 @@
             border-radius: 2px;
             transition: transform .15s;
         }
-        .heatmap-cell:hover { transform: scale(1.3); z-index: 5; }
-        .heatmap-cell.active { background: var(--red); }
-        .heatmap-cell.level-1 { opacity: .2; }
-        .heatmap-cell.level-2 { opacity: .4; }
-        .heatmap-cell.level-3 { opacity: .6; }
-        .heatmap-cell.level-4 { opacity: .8; }
-        .heatmap-cell.level-5 { opacity: 1;  }
-        .heatmap-labels {
+        .heatmap-cell:hover { transform: scale(1.4); z-index: 5; cursor: pointer; }
+        .heatmap-cell.active { background: var(--coral); }
+        .heatmap-cell.level-1 { opacity: .18; }
+        .heatmap-cell.level-2 { opacity: .38; }
+        .heatmap-cell.level-3 { opacity: .60; }
+        .heatmap-cell.level-4 { opacity: .80; }
+        .heatmap-cell.level-5 { opacity: 1; }
+        .heatmap-month-labels {
             position: relative;
-            margin-top: 6px;
             height: 14px;
-            font-size: 9px;
-            color: var(--ink-4);
+            margin-top: 5px;
         }
-        .heatmap-labels span { position: absolute; }
-
-        /* ---- HOURLY HEATMAP ---- */
-        .hourly-heatmap-container {
-            display: flex;
-            flex-direction: column;
-            margin-top: 12px;
-            overflow-x: auto;
-            padding-bottom: 6px;
-        }
-        .hourly-heatmap {
-            display: grid;
-            grid-template-columns: 56px repeat(24, 1fr);
-            gap: 2px;
-            min-width: 560px;
-        }
-        .hourly-heatmap-cell {
-            aspect-ratio: 1;
-            background: var(--bg-inset);
-            border-radius: 2px;
-            cursor: pointer;
-            min-height: 18px;
-            transition: transform .15s;
-        }
-        .hourly-heatmap-cell:hover { transform: scale(1.2); z-index: 5; }
-        .hourly-heatmap-cell.active { background: var(--red); }
-        .hourly-heatmap-cell.level-1 { opacity: .2; }
-        .hourly-heatmap-cell.level-2 { opacity: .4; }
-        .hourly-heatmap-cell.level-3 { opacity: .6; }
-        .hourly-heatmap-cell.level-4 { opacity: .8; }
-        .hourly-heatmap-cell.level-5 { opacity: 1;  }
-        .hourly-heatmap-day-label {
-            font-size: 10px;
-            color: var(--ink-2);
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            padding-right: 8px;
-            text-transform: uppercase;
-            font-weight: 600;
-        }
-        .hourly-heatmap-hour-label {
+        .heatmap-month-labels span {
+            font-family: 'IBM Plex Mono', monospace;
             font-size: 8px;
             color: var(--ink-4);
-            text-align: center;
-            padding: 3px 0;
+            position: absolute;
         }
-        .hourly-heatmap-legend {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            margin-top: 12px;
-            font-size: 10px;
-            color: var(--ink-3);
-        }
-        .legend-cells { display: flex; gap: 3px; }
-        .legend-cell {
-            width: 11px; height: 11px;
-            border-radius: 2px;
-            background: var(--bg-inset);
-        }
-        .legend-cell.level-1 { background: var(--red); opacity: .2; }
-        .legend-cell.level-2 { background: var(--red); opacity: .4; }
-        .legend-cell.level-3 { background: var(--red); opacity: .6; }
-        .legend-cell.level-4 { background: var(--red); opacity: .8; }
 
-        /* ---- WEEKLY CALENDAR ---- */
-        .weekly-calendar-header {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 14px;
-            margin: 12px 0;
+        /* ================================================================
+           HOURLY BARS
+        ================================================================ */
+        .hourly-bars {
+            display: grid;
+            grid-template-columns: repeat(24, 1fr);
+            gap: 3px;
+            align-items: flex-end;
+            height: 60px;
+            margin-top: 12px;
         }
-        .calendar-nav-btn {
-            background: var(--bg-raised);
-            border: 1px solid var(--line);
-            border-radius: var(--r);
-            padding: 6px 12px;
+        .hour-bar {
+            background: var(--coral);
+            border-radius: 2px 2px 0 0;
+            min-height: 2px;
+            opacity: .5;
+            transition: opacity .15s, transform .15s;
             cursor: pointer;
-            color: var(--ink);
-            font-size: .875rem;
-            transition: background .15s, border-color .15s;
+            position: relative;
         }
-        .calendar-nav-btn:hover { background: var(--red); color: var(--ink-inv); border-color: var(--red); }
-        .calendar-nav-btn:disabled { opacity: .3; cursor: not-allowed; }
-        .calendar-range {
-            font-size: .875rem;
-            font-weight: 600;
-            color: var(--ink);
-            min-width: 140px;
+        .hour-bar:hover { opacity: 1; transform: scaleY(1.05); }
+        .hour-bar.peak  { opacity: 1; }
+        .hourly-labels {
+            display: grid;
+            grid-template-columns: repeat(24, 1fr);
+            gap: 3px;
+            margin-top: 4px;
+        }
+        .hour-lbl {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 7px;
+            color: var(--ink-4);
             text-align: center;
         }
-        .weekly-calendar-container {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            padding: 8px 0;
-            overflow-x: auto;
-        }
-        .calendar-week { display: flex; flex-direction: column; gap: 6px; min-width: 660px; }
-        .calendar-week-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 2px;
-        }
-        .calendar-week-title { font-size: .8125rem; font-weight: 600; color: var(--ink); }
-        .calendar-week-total { font-size: 10px; color: var(--ink-3); }
-        .calendar-days-container {
+        .hour-lbl.peak { color: var(--coral); font-weight: 700; }
+
+        /* ================================================================
+           WEEKLY BAR CHART
+        ================================================================ */
+        .day-bars {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 4px;
-        }
-        .calendar-day-column { display: flex; flex-direction: column; gap: 2px; }
-        .calendar-day-header {
-            font-size: 9px;
-            color: var(--ink-4);
-            text-align: center;
-            padding: 3px 0;
-            text-transform: uppercase;
-            font-weight: 600;
-        }
-        .calendar-day-date {
-            font-size: 8px;
-            color: var(--ink-4);
-            text-align: center;
-            margin-bottom: 3px;
-        }
-        .calendar-hours-grid {
-            display: grid;
-            grid-template-rows: repeat(24, 1fr);
-            gap: 1px;
-            height: 110px;
-        }
-        .calendar-hour-cell {
-            background: var(--bg-inset);
-            border-radius: 1px;
-            cursor: pointer;
-            min-height: 2px;
-            transition: transform .1s;
-        }
-        .calendar-hour-cell:hover { transform: scaleX(1.1); }
-        .calendar-hour-cell.active { background: var(--red); }
-        .calendar-hour-cell.level-1 { opacity: .2; }
-        .calendar-hour-cell.level-2 { opacity: .4; }
-        .calendar-hour-cell.level-3 { opacity: .6; }
-        .calendar-hour-cell.level-4 { opacity: .8; }
-        .calendar-hour-cell.level-5 { opacity: 1;  }
-        .calendar-hour-labels {
-            display: grid;
-            grid-template-rows: repeat(24, 1fr);
-            gap: 1px;
-            height: 110px;
-            width: 18px;
-        }
-        .calendar-hour-label {
-            font-size: 6px;
-            color: var(--ink-4);
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            padding-right: 3px;
-        }
-        .calendar-hour-label:nth-child(4n+1) { font-size: 7px; color: var(--ink-3); }
-        .weekly-calendar-legend {
-            display: flex;
-            align-items: center;
-            justify-content: center;
             gap: 6px;
-            margin-top: 8px;
-            font-size: 10px;
+            align-items: flex-end;
+            height: 80px;
+            margin-top: 12px;
+        }
+        .day-bar-col { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .day-bar {
+            width: 100%;
+            background: var(--coral);
+            border-radius: 3px 3px 0 0;
+            min-height: 2px;
+            opacity: .55;
+            transition: opacity .15s;
+        }
+        .day-bar.peak { opacity: 1; }
+        .day-bar-lbl {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 8px;
             color: var(--ink-3);
+            text-transform: uppercase;
+        }
+        .day-bar.peak + .day-bar-lbl { color: var(--coral); font-weight: 700; }
+
+        /* ================================================================
+           MODEL ITEMS
+        ================================================================ */
+        .model-item {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--line);
+        }
+        .model-item:last-child { border-bottom: none; }
+        .model-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .model-name {
+            font-size: .813rem;
+            font-weight: 600;
+            color: var(--ink);
+        }
+        .model-tokens {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .813rem;
+            font-weight: 600;
+            color: var(--coral);
+            font-variant-numeric: tabular-nums;
+        }
+        .model-share-bar {
+            height: 4px;
+            background: var(--bg-inset);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .model-share-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        /* ---- TOOLTIPS ---- */
-        .heatmap-tooltip,
-        .hourly-tooltip,
-        .weekly-calendar-tooltip {
+        /* ================================================================
+           TOOLTIP (heatmap)
+        ================================================================ */
+        .hm-tooltip {
             position: fixed;
-            background: var(--bg-tooltip, #1A1A1A);
-            border: 1px solid rgba(255,255,255,.1);
+            background: #111111;
+            border: 1px solid rgba(255,255,255,.08);
             border-radius: 8px;
             padding: 10px 14px;
-            box-shadow: 0 8px 24px rgba(0,0,0,.4);
+            box-shadow: 0 8px 24px rgba(0,0,0,.45);
             pointer-events: none;
             opacity: 0;
-            transform: translateY(-4px);
+            transform: translateY(-6px);
             transition: opacity .15s, transform .15s;
-            z-index: 1000;
-            min-width: 160px;
+            z-index: 2000;
+            min-width: 150px;
         }
-        .heatmap-tooltip.visible,
-        .hourly-tooltip.visible,
-        .weekly-calendar-tooltip.visible { opacity: 1; transform: translateY(0); }
-        .tooltip-date, .tooltip-day-hour, .tooltip-datetime {
-            font-size: .8125rem;
+        .hm-tooltip.visible { opacity: 1; transform: translateY(0); }
+        .hm-tooltip-date {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .75rem;
             font-weight: 600;
             color: #FFFFFF;
             margin-bottom: 8px;
             padding-bottom: 6px;
-            border-bottom: 1px solid rgba(255,255,255,.15);
+            border-bottom: 1px solid rgba(255,255,255,.12);
         }
-        .tooltip-stats { display: flex; flex-direction: column; gap: 4px; }
-        .stat-row { display: flex; justify-content: space-between; align-items: center; }
-        .stat-label { font-size: .75rem; color: rgba(255,255,255,.6); }
-        .stat-value { font-size: .75rem; font-weight: 600; color: #FFFFFF; font-variant-numeric: tabular-nums; }
-        .stat-value.messages { color: #F08070; }
-        .stat-value.sessions { color: rgba(255,255,255,.8); }
-        .stat-value.tools    { color: #70C0C0; }
-        .stat-value.tokens   { color: #F0C060; }
+        .hm-tooltip-rows { display: flex; flex-direction: column; gap: 4px; }
+        .hm-tooltip-row  { display: flex; justify-content: space-between; gap: 20px; }
+        .hm-tooltip-lbl  { font-size: .7rem; color: rgba(255,255,255,.5); }
+        .hm-tooltip-val  {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .7rem;
+            font-weight: 600;
+            color: #FFFFFF;
+            font-variant-numeric: tabular-nums;
+        }
+        .hm-tooltip-val.msg { color: #FF8070; }
+        .hm-tooltip-val.ses { color: #5DDEDE; }
+        .hm-tooltip-val.tok { color: #FFD080; }
 
-        /* ---- CHARTS ---- */
-        .chart-container { position: relative; height: 240px; }
-        .chart-card, .card.chart-full {
-            background: var(--bg-card);
-            border: 1px solid var(--line);
-            border-radius: var(--r);
-            padding: 18px 20px;
-            box-shadow: var(--sh-sm);
-        }
-        .chart-card:hover { border-color: var(--line-2); box-shadow: var(--sh-md); }
-        .chart-title {
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: .08em;
-            text-transform: uppercase;
-            color: var(--ink-3);
-            margin-bottom: 14px;
-        }
-
-        /* ---- EXPANDABLE CARDS ---- */
-        .expandable-card .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+        /* ================================================================
+           EXPANDABLE
+        ================================================================ */
         .expand-btn {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .7rem;
+            font-weight: 600;
+            letter-spacing: .04em;
             background: none;
             border: none;
-            color: var(--red);
+            color: var(--coral);
             cursor: pointer;
-            font-weight: 700;
-            font-size: 11px;
             display: flex;
             align-items: center;
             gap: 4px;
         }
+        .expand-btn:hover { opacity: .75; }
         .card-content.collapsed { display: none; }
         .card-content.expanded  {
             display: block;
-            animation: slideDown .2s ease;
+            animation: slideDown .25s ease-out;
         }
         @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-8px); }
+            from { opacity: 0; transform: translateY(-6px); }
             to   { opacity: 1; transform: translateY(0); }
         }
 
-        /* ---- SUGGESTIONS ---- */
-        .suggestions-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 12px;
-            margin-top: 14px;
+        /* ================================================================
+           INSIGHTS LOG
+        ================================================================ */
+        .insights-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
-        .suggestion-card {
+        .insight-card {
+            background: var(--bg-card);
+            border: 1px solid var(--line);
+            border-radius: var(--r-lg);
+            overflow: hidden;
+            box-shadow: var(--sh-xs);
+            transition: box-shadow .2s, transform .2s;
+        }
+        .insight-card:hover { box-shadow: var(--sh-md); transform: translateY(-2px); }
+        .insight-card-head {
+            background: var(--bg-hero);
+            color: white;
+            padding: 20px 24px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 16px;
+            align-items: start;
+        }
+        .insight-week {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .688rem;
+            font-weight: 500;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,.35);
+            margin-bottom: 6px;
+        }
+        .insight-headline {
+            font-family: 'Syne', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: #FFFFFF;
+            line-height: 1.3;
+        }
+        .insight-kpi-strip {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .insight-kpi {
+            text-align: right;
+        }
+        .insight-kpi-val {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            color: #FFFFFF;
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+        }
+        .insight-kpi-val.coral { color: #FF8070; }
+        .insight-kpi-val.teal  { color: #5DDEDE; }
+        .insight-kpi-lbl {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .563rem;
+            font-weight: 500;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,.3);
+            margin-top: 3px;
+        }
+        .insight-sparkline-wrap {
+            padding: 14px 24px 10px;
+            border-bottom: 1px solid var(--line);
+            background: var(--bg-raised);
+        }
+        .insight-sparkline-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .563rem;
+            font-weight: 600;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--ink-3);
+            margin-bottom: 6px;
+        }
+        .insight-sparkline-canvas { position: relative; height: 40px; }
+        .insight-body {
+            padding: 20px 24px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 24px;
+        }
+        .insight-section-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .625rem;
+            font-weight: 600;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        .insight-section-title.working { color: var(--teal); }
+        .insight-section-title.friction { color: var(--coral); }
+        .insight-section-title.tips { color: var(--amber); }
+        .insight-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+        .insight-list li {
+            font-size: .813rem;
+            color: var(--ink-2);
+            line-height: 1.45;
+            padding-left: 14px;
+            position: relative;
+        }
+        .insight-list li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 8px;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+        }
+        .insight-list.working  li::before { background: var(--teal); }
+        .insight-list.friction li::before { background: var(--coral); }
+        .insight-list.tips     li::before { background: var(--amber); }
+        .insight-notes {
+            grid-column: 1 / -1;
+            background: var(--bg-inset);
+            border-radius: 6px;
+            padding: 10px 14px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .75rem;
+            color: var(--ink-2);
+            line-height: 1.5;
+            border: 1px solid var(--line);
+        }
+        .insight-notes::before {
+            content: 'Note ';
+            font-weight: 600;
+            color: var(--ink-3);
+        }
+
+        /* Trend strip for insights */
+        .insights-trend {
             background: var(--bg-card);
             border: 1px solid var(--line);
             border-radius: var(--r);
+            padding: 16px 22px;
+            box-shadow: var(--sh-xs);
+        }
+        .insights-trend-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .625rem;
+            font-weight: 600;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--ink-3);
+            margin-bottom: 12px;
+        }
+        .trend-canvas-wrap { position: relative; height: 64px; }
+        .trend-empty {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .75rem;
+            color: var(--ink-4);
+            padding: 20px 0;
+            text-align: center;
+        }
+
+        /* ================================================================
+           SUGGESTIONS (from existing code, restyled)
+        ================================================================ */
+        .suggestion-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 12px;
+        }
+        .suggestion-item {
+            background: var(--bg-raised);
+            border: 1px solid var(--line);
+            border-radius: var(--r);
             padding: 16px 18px;
-            border-left: 3px solid var(--red);
-            transition: box-shadow .15s;
-            position: relative;
+            border-left: 3px solid var(--coral);
+            transition: box-shadow .15s, transform .15s;
         }
-        .suggestion-card:hover { box-shadow: var(--sh-md); }
-        .suggestion-icon { font-size: 20px; margin-bottom: 8px; }
-        .suggestion-title { font-size: .875rem; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
-        .suggestion-desc { font-size: .8125rem; color: var(--ink-2); line-height: 1.5; }
-        .suggestion-type {
-            position: absolute; top: 14px; right: 14px;
-            font-size: 9px; color: var(--ink-4);
-            text-transform: uppercase; letter-spacing: .08em; font-weight: 700;
+        .suggestion-item:hover { box-shadow: var(--sh-sm); transform: translateY(-1px); }
+        .suggestion-icon { font-size: 18px; margin-bottom: 8px; }
+        .suggestion-title { font-size: .875rem; font-weight: 700; color: var(--ink); margin-bottom: 5px; }
+        .suggestion-desc  { font-size: .8125rem; color: var(--ink-2); line-height: 1.45; }
+        .suggestion-tag {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 2px 7px;
+            border-radius: 3px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .563rem;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-transform: uppercase;
         }
-        .suggestion-impact {
-            display: inline-block; margin-top: 10px;
-            padding: 3px 8px; border-radius: 3px;
-            font-size: 10px; font-weight: 700;
-            text-transform: uppercase; letter-spacing: .04em;
-        }
-        .suggestion-impact.high   { background: rgba(201,79,58,.12);  color: var(--red); }
-        .suggestion-impact.medium { background: rgba(42,122,154,.12); color: var(--amber); }
-        .suggestion-impact.low    { background: var(--bg-inset);      color: var(--ink-3); }
+        .suggestion-tag.high   { background: var(--coral-light); color: var(--coral); }
+        .suggestion-tag.medium { background: var(--teal-light);  color: var(--teal); }
+        .suggestion-tag.low    { background: var(--bg-inset);    color: var(--ink-3); }
 
-        /* ---- GLOSSARY ---- */
-        .glossary-term { color: var(--red); font-size: .875rem; margin-bottom: 4px; font-weight: 600; }
-        .glossary-def  { font-size: .8125rem; color: var(--ink-2); line-height: 1.5; }
+        /* ================================================================
+           GLOSSARY
+        ================================================================ */
+        .glossary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            padding-top: 16px;
+        }
+        .glossary-term {
+            font-family: 'Syne', sans-serif;
+            font-size: .875rem;
+            font-weight: 700;
+            color: var(--coral);
+            margin-bottom: 4px;
+        }
+        .glossary-def {
+            font-size: .8125rem;
+            color: var(--ink-2);
+            line-height: 1.5;
+        }
 
-        /* ---- MODAL ---- */
+        /* ================================================================
+           MODAL
+        ================================================================ */
         .modal { display: none; position: fixed; inset: 0; z-index: 1000; }
         .modal.active { display: flex; align-items: center; justify-content: center; }
         .modal-overlay { position: absolute; inset: 0; background: var(--overlay); }
         .modal-content {
             position: relative;
             background: var(--bg-card);
-            border-radius: 10px;
-            max-width: 780px; max-height: 80vh;
-            overflow: auto; padding: 24px;
+            border-radius: 12px;
+            max-width: 760px;
+            width: 90vw;
+            max-height: 80vh;
+            overflow: auto;
+            padding: 28px;
             border: 1px solid var(--line);
             box-shadow: 0 20px 60px rgba(0,0,0,.25);
         }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
-        .modal-header h2 { font-size: 1.125rem; font-weight: 700; color: var(--ink); }
-        .close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--ink-2); line-height: 1; }
+        .modal-header h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--ink);
+        }
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--ink-3);
+            line-height: 1;
+            padding: 4px;
+        }
         .close-btn:hover { color: var(--ink); }
 
-        /* ---- LOADING / ERROR ---- */
+        /* ================================================================
+           LOADING / ERROR
+        ================================================================ */
         #dashboard { display: none; }
         #dashboard.loaded { display: block; }
-        .load-section { text-align: center; padding: 80px 20px; }
-        .load-section .header-icon { font-size: 36px; margin-bottom: 12px; display: block; }
-        .error {
-            background: var(--red-soft, #F2E8E6);
-            color: var(--red);
+        .load-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 60vh;
+            gap: 12px;
+        }
+        .load-screen-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--ink);
+        }
+        .load-screen-sub {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .813rem;
+            color: var(--ink-3);
+        }
+        .error-msg {
+            background: var(--coral-light);
+            color: var(--coral);
             padding: 10px 14px;
             border-radius: var(--r);
-            margin-top: 16px;
-            display: none;
-            font-size: .875rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .8125rem;
+            margin-top: 10px;
         }
 
-        /* ---- ANIMATIONS ---- */
-        @keyframes countUp {
-            from { opacity: 0; transform: translateY(8px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
+        /* ================================================================
+           ANIMATIONS
+        ================================================================ */
         @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(16px); }
+            from { opacity: 0; transform: translateY(20px); }
             to   { opacity: 1; transform: translateY(0); }
         }
-        .animate-in { animation: fadeUp .4s ease-out forwards; }
-        .delay-1 { animation-delay: .05s; opacity: 0; }
-        .delay-2 { animation-delay: .10s; opacity: 0; }
-        .delay-3 { animation-delay: .15s; opacity: 0; }
-        .delay-4 { animation-delay: .20s; opacity: 0; }
-        .delay-5 { animation-delay: .25s; opacity: 0; }
-        .delay-6 { animation-delay: .30s; opacity: 0; }
+        .fade-up { opacity: 0; animation: fadeUp .5s ease-out forwards; }
+        .d1 { animation-delay: .05s; }
+        .d2 { animation-delay: .10s; }
+        .d3 { animation-delay: .15s; }
+        .d4 { animation-delay: .20s; }
+        .d5 { animation-delay: .25s; }
+        .d6 { animation-delay: .30s; }
+        .d7 { animation-delay: .35s; }
+        .d8 { animation-delay: .40s; }
 
-        /* ---- SKELETON ---- */
+        /* Scroll-reveal */
+        .reveal { opacity: 0; transform: translateY(16px); transition: opacity .5s ease-out, transform .5s ease-out; }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+
+        /* Skeleton shimmer */
         .skeleton {
             background: linear-gradient(90deg, var(--bg-inset) 0%, var(--bg-raised) 50%, var(--bg-inset) 100%);
             background-size: 200% 100%;
@@ -829,37 +1178,56 @@
             100% { background-position: -200% 0; }
         }
 
-        /* ---- FOCUS & A11Y ---- */
-        *:focus-visible {
-            outline: 2px solid var(--red);
-            outline-offset: 2px;
-            border-radius: 3px;
-        }
+        /* ================================================================
+           A11Y
+        ================================================================ */
         .skip-link {
-            position: absolute; top: -100%; left: 50%;
+            position: absolute;
+            top: -100%;
+            left: 50%;
             transform: translateX(-50%);
-            background: var(--red); color: var(--ink-inv);
-            padding: 8px 16px; border-radius: var(--r);
-            text-decoration: none; font-weight: 600;
-            z-index: 9999; transition: top .2s;
+            background: var(--coral);
+            color: #FFFFFF;
+            padding: 8px 16px;
+            border-radius: var(--r);
+            text-decoration: none;
+            font-weight: 700;
+            z-index: 9999;
+            transition: top .2s;
         }
         .skip-link:focus { top: 12px; }
 
-        /* ---- RESPONSIVE ---- */
-        @media (max-width: 900px) {
-            .grid-5 { grid-template-columns: repeat(3, 1fr); }
-            .token-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-        @media (max-width: 640px) {
-            body { padding: 20px 12px 40px; }
-            .grid, .grid-3, .grid-4, .grid-5 { grid-template-columns: 1fr; }
-            .hero-grid { grid-template-columns: 1fr; }
-            .token-grid { grid-template-columns: repeat(2, 1fr); }
-            .chart-container { height: 180px; }
-            .hero-value { font-size: 2rem; }
+        *:focus-visible {
+            outline: 2px solid var(--coral);
+            outline-offset: 2px;
+            border-radius: 3px;
         }
 
-        /* ---- REDUCED MOTION ---- */
+        /* ================================================================
+           RESPONSIVE
+        ================================================================ */
+        @media (max-width: 960px) {
+            .hero-kpis { grid-template-columns: repeat(2, 1fr); }
+            .hero-sparkline { grid-column: span 2; }
+            .grid-8-4 { grid-template-columns: 1fr; }
+            .grid-7-5 { grid-template-columns: 1fr; }
+            .grid-6-4 { grid-template-columns: 1fr; }
+            .insight-body { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 640px) {
+            .topbar-sub { display: none; }
+            .agents-link { display: none; }
+            .hero-banner { padding: 28px 16px 24px; }
+            .hero-kpis { grid-template-columns: repeat(2, 1fr); }
+            .hero-sparkline { grid-column: span 2; }
+            .hero-headline { font-size: 1.4rem; }
+            .grid-3, .grid-4, .grid-5 { grid-template-columns: repeat(2, 1fr); }
+            .grid-2 { grid-template-columns: 1fr; }
+            .chart-container { height: 160px; }
+            .insight-card-head { grid-template-columns: 1fr; }
+            .insight-kpi-strip { flex-direction: row; flex-wrap: wrap; justify-content: flex-start; }
+        }
+
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after {
                 animation-duration: .01ms !important;
@@ -870,1277 +1238,1333 @@
     </style>
 </head>
 <body>
-    <a href="#dashboard" class="skip-link">Skip to main content</a>
-    <div class="container">
-        <div id="loadSection" class="load-section">
-            <div class="header-icon">⭐</div>
-            <h1>My Claude Activity</h1>
-            <p style="margin-top: 30px;">Loading your stats...</p>
+<a href="#dashboard" class="skip-link">Skip to main content</a>
+
+<!-- TOP BAR -->
+<nav class="topbar" role="banner">
+    <div class="topbar-inner">
+        <div class="topbar-brand">
+            <span class="topbar-title">My <span>Claude</span> Activity</span>
+            <span class="topbar-sub" id="topbar-date">--</span>
         </div>
+        <div class="topbar-right">
+            <div class="account-filter" role="group" aria-label="Account filter">
+                <button class="account-btn active" data-account="merged" onclick="switchAccount('merged')">Merged</button>
+                <button class="account-btn" data-account="personal" onclick="switchAccount('personal')">Personal</button>
+                <button class="account-btn disabled-fho" data-account="fho" title="No FHO sessions yet" onclick="switchAccount('fho')">FHO</button>
+            </div>
+            <a href="/home.html" class="agents-link">Live Agents</a>
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light theme" title="Toggle theme (Ctrl+Shift+D)">
+                <span id="theme-icon">🌙</span>
+            </button>
+        </div>
+    </div>
+</nav>
 
-        <div id="dashboard">
-            <div class="header">
-                <div class="header-brand">
-                    <div class="logo-mark">⚡</div>
-                    <div class="logo-text">
-                        <h1>My Claude Activity</h1>
-                    </div>
+<!-- LOADING SCREEN -->
+<div id="loadSection">
+    <div class="load-screen page-wrap">
+        <div style="font-size:32px;">⚡</div>
+        <div class="load-screen-title">My Claude Activity</div>
+        <div class="load-screen-sub">Loading stats...</div>
+    </div>
+</div>
+
+<!-- MAIN DASHBOARD -->
+<div id="dashboard">
+    <!-- HERO BANNER -->
+    <div class="hero-banner">
+        <div class="hero-inner">
+            <div class="hero-label">Claude Code Usage Intelligence</div>
+            <h1 class="hero-headline" id="hero-headline">
+                Loading your<br>activity summary&hellip;
+            </h1>
+            <div class="hero-kpis fade-up d2" id="hero-kpis">
+                <div class="hero-kpi">
+                    <div class="hero-kpi-label">Sessions</div>
+                    <div class="hero-kpi-value coral" id="kpi-sessions">0</div>
+                    <div class="hero-kpi-sub" id="kpi-sessions-sub">total</div>
                 </div>
-                <div style="display:flex;align-items:center;gap:10px;">
-                    <a href="/home.html" style="font-size:.8125rem;font-weight:600;color:var(--ink-2);text-decoration:none;padding:6px 12px;border-radius:var(--r);border:1px solid var(--line);background:var(--bg-card);transition:all .15s;">Live Agents</a>
-                    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme" title="Toggle dark/light mode">
-                        <span class="theme-icon">🌙</span>
-                    </button>
+                <div class="hero-kpi">
+                    <div class="hero-kpi-label">Messages</div>
+                    <div class="hero-kpi-value" id="kpi-messages">0</div>
+                    <div class="hero-kpi-sub" id="kpi-messages-sub">total exchanges</div>
+                </div>
+                <div class="hero-kpi">
+                    <div class="hero-kpi-label">Tokens</div>
+                    <div class="hero-kpi-value teal" id="kpi-tokens">0</div>
+                    <div class="hero-kpi-sub">processed</div>
+                </div>
+                <div class="hero-kpi">
+                    <div class="hero-kpi-label">Tool Calls</div>
+                    <div class="hero-kpi-value" id="kpi-tools">0</div>
+                    <div class="hero-kpi-sub">total</div>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <!-- HERO METRICS: Bento Box Layout -->
-            <!-- Top Row: Two Large Hero Cards -->
-            <div class="grid hero-grid">
-                <div class="card hero-card animate-in delay-1">
-                    <div class="card-label">SESSIONS</div>
-                    <div class="card-value hero-value" id="totalSessions">0</div>
-                    <div class="card-subtext">coding sessions</div>
+    <!-- PAGE CONTENT -->
+    <div class="page-wrap" id="content-wrap">
+
+        <!-- ===== SECTION: OVERVIEW STATS ===== -->
+        <section class="section reveal" aria-label="Overview statistics">
+            <div class="section-header">
+                <span class="section-title">Overview</span>
+            </div>
+            <div class="grid-5 fade-up d3">
+                <div class="card stat-card card-accent-coral">
+                    <div class="stat-card-label">Day streak</div>
+                    <div class="stat-card-value coral" id="stat-streak">0</div>
+                    <div class="stat-card-sub">consecutive days</div>
                 </div>
-
-                <div class="card hero-card animate-in delay-2">
-                    <div class="card-label">MESSAGES</div>
-                    <div class="card-value hero-value" id="totalMessages">0</div>
-                    <div class="card-subtext">total exchanges</div>
+                <div class="card stat-card">
+                    <div class="stat-card-label">Avg/session</div>
+                    <div class="stat-card-value" id="stat-avg-session">0</div>
+                    <div class="stat-card-sub">messages</div>
+                </div>
+                <div class="card stat-card card-accent-teal">
+                    <div class="stat-card-label">Avg tokens/day</div>
+                    <div class="stat-card-value teal" id="stat-avg-tokens">0</div>
+                    <div class="stat-card-sub">on active days</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-card-label">Longest session</div>
+                    <div class="stat-card-value" id="stat-longest">0</div>
+                    <div class="stat-card-sub" id="stat-longest-sub"></div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-card-label">Journey started</div>
+                    <div class="stat-card-value" id="stat-started" style="font-size:1.1rem;">-</div>
+                    <div class="stat-card-sub" id="stat-started-sub"></div>
                 </div>
             </div>
+        </section>
 
-            <!-- Middle Row: Full-width Token Breakdown -->
-            <div class="card token-breakdown animate-in delay-3">
-                <div class="token-header">
-                    <div class="card-label">TOTAL TOKENS PROCESSED</div>
-                    <div class="card-value accent" id="totalTokens">0</div>
+        <!-- ===== SECTION: ACTIVITY TIMELINE ===== -->
+        <section class="section reveal" aria-label="Activity over time">
+            <div class="section-header">
+                <span class="section-title">Activity Timeline</span>
+                <span class="section-aside" id="timeline-range">--</span>
+            </div>
+            <div class="chart-card fade-up d2">
+                <div class="chart-header">
+                    <span class="chart-title">Daily Messages + Sessions</span>
                 </div>
-                <div class="token-grid">
-                    <div class="token-metric">
-                        <div class="token-label">Input</div>
-                        <div class="token-value" id="totalInputTokens">0</div>
+                <div class="chart-container">
+                    <canvas id="activityChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== SECTION: TOKENS + MODELS ===== -->
+        <section class="section reveal" aria-label="Token and model breakdown">
+            <div class="section-header">
+                <span class="section-title">Tokens &amp; Models</span>
+            </div>
+            <div class="grid-8-4 fade-up d2">
+                <!-- LEFT: token breakdown + chart -->
+                <div style="display:flex;flex-direction:column;gap:var(--gap);">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <span class="chart-title">Tokens per day</span>
+                            <span class="chart-value-pill" id="tokens-pill">0</span>
+                        </div>
+                        <div class="chart-container-sm">
+                            <canvas id="tokensChart"></canvas>
+                        </div>
                     </div>
-                    <div class="token-metric">
-                        <div class="token-label">Output</div>
-                        <div class="token-value" id="totalOutputTokens">0</div>
+                    <div class="card">
+                        <div class="chart-title" style="margin-bottom:14px;">Token breakdown</div>
+                        <div id="token-bars">
+                            <div class="token-bar-wrap">
+                                <span class="token-bar-lbl">Input</span>
+                                <div class="token-bar-track"><div class="token-bar-fill input" id="tb-input" style="width:0%"></div></div>
+                                <span class="token-bar-val" id="tv-input">0</span>
+                            </div>
+                            <div class="token-bar-wrap">
+                                <span class="token-bar-lbl">Output</span>
+                                <div class="token-bar-track"><div class="token-bar-fill output" id="tb-output" style="width:0%"></div></div>
+                                <span class="token-bar-val" id="tv-output">0</span>
+                            </div>
+                            <div class="token-bar-wrap">
+                                <span class="token-bar-lbl">Cache read</span>
+                                <div class="token-bar-track"><div class="token-bar-fill cache-r" id="tb-cache-r" style="width:0%"></div></div>
+                                <span class="token-bar-val" id="tv-cache-r">0</span>
+                            </div>
+                            <div class="token-bar-wrap">
+                                <span class="token-bar-lbl">Cache write</span>
+                                <div class="token-bar-track"><div class="token-bar-fill cache-w" id="tb-cache-w" style="width:0%"></div></div>
+                                <span class="token-bar-val" id="tv-cache-w">0</span>
+                            </div>
+                        </div>
+                        <div style="margin-top:14px;display:flex;justify-content:space-between;align-items:center;">
+                            <span class="stat-card-label" style="margin:0;">Cache hit rate</span>
+                            <span style="font-family:'IBM Plex Mono',monospace;font-size:.875rem;font-weight:700;color:var(--teal);" id="cache-hit-rate">0%</span>
+                        </div>
+                        <div class="prog-bar"><div class="prog-fill teal" id="cache-prog" style="width:0%"></div></div>
                     </div>
-                    <div class="token-metric">
-                        <div class="token-label">Cache Read</div>
-                        <div class="token-value" id="cacheReadTokens">0</div>
+                </div>
+                <!-- RIGHT: model list -->
+                <div class="card" style="height:fit-content;">
+                    <div class="chart-header">
+                        <span class="chart-title">Model usage</span>
+                        <span class="chart-value-pill" id="cost-pill">$0</span>
                     </div>
-                    <div class="token-metric">
-                        <div class="token-label">Cache Write</div>
-                        <div class="token-value" id="cacheWriteTokens">0</div>
+                    <div id="model-list">
+                        <!-- populated by JS -->
                     </div>
                 </div>
             </div>
+        </section>
 
-            <!-- Row 3: Cache Efficiency + Model Usage -->
-            <div class="grid" style="grid-template-columns: 1fr 1fr; margin-top: 16px;">
+        <!-- ===== SECTION: ACTIVITY PATTERNS ===== -->
+        <section class="section reveal" aria-label="Activity patterns">
+            <div class="section-header">
+                <span class="section-title">Activity Patterns</span>
+                <span class="section-aside" id="pattern-label">--</span>
+            </div>
+            <div class="grid-2 fade-up d2">
+                <!-- Day-of-week activity -->
                 <div class="card">
-                    <div class="card-label">CACHE EFFICIENCY</div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <span class="card-subtext dark">Cache Hit Rate</span>
-                        <span class="card-value accent" id="cacheHitRate" style="font-size: 28px;">0%</span>
+                    <div class="chart-title" style="margin-bottom:4px;">Day of week</div>
+                    <div class="day-bars" id="day-bars">
+                        <!-- populated by JS -->
                     </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="cacheProgressBar" style="width: 0%"></div>
-                    </div>
-                    <div class="metrics-row">
-                        <span>Cache Read</span>
-                        <span class="cache-metric-value" id="cacheReadTokensSmall">0</span>
-                    </div>
-                    <div class="metrics-row">
-                        <span>Cache Write</span>
-                        <span class="cache-metric-value" id="cacheWriteTokensSmall">0</span>
+                    <div style="margin-top:8px;display:grid;grid-template-columns:repeat(7,1fr);gap:6px;" id="day-bar-labels">
+                        <!-- populated by JS -->
                     </div>
                 </div>
-
-                <div class="card expandable-card" id="modelDetailsCard">
-                    <div class="card-header">
-                        <div class="card-label">MODEL USAGE</div>
-                        <button class="expand-btn" aria-expanded="false">
-                            <span class="expand-text">Show Details</span>
-                            <span class="expand-icon">▼</span>
-                        </button>
-                    </div>
-                    <div class="card-value accent" id="totalCost">$0</div>
-                    <div class="card-subtext" id="modelCount">0 models used</div>
-                    <div class="card-content collapsed" id="modelDetailsContent">
-                        <!-- Populated by JS -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Bottom Row: Four Compact Stat Cards -->
-            <div class="grid grid-5 compact-grid">
-                <div class="card compact-card animate-in delay-4">
-                    <div class="compact-icon">🔥</div>
-                    <div class="compact-value" id="currentStreak">0</div>
-                    <div class="compact-label">DAY STREAK</div>
-                </div>
-
-                <div class="card compact-card animate-in delay-4">
-                    <div class="compact-icon">📊</div>
-                    <div class="compact-value" id="avgPerSession">0</div>
-                    <div class="compact-label">AVG/SESSION</div>
-                </div>
-
-                <div class="card compact-card animate-in delay-5">
-                    <div class="compact-icon">🔧</div>
-                    <div class="compact-value" id="totalTools">0</div>
-                    <div class="compact-label">TOOL CALLS</div>
-                </div>
-
-                <div class="card compact-card animate-in delay-5">
-                    <div class="compact-icon">📅</div>
-                    <div class="compact-value" id="journeyDate">-</div>
-                    <div class="compact-label">STARTED</div>
-                </div>
-
-                <div class="card compact-card animate-in delay-5">
-                    <div class="compact-icon">📈</div>
-                    <div class="compact-value" id="avgTokensPerDay">0</div>
-                    <div class="compact-label">AVG TOKENS/DAY</div>
-                </div>
-            </div>
-
-            <!-- Activity Stats: Most Active Day + Weekly Activity -->
-            <div class="grid">
+                <!-- Hourly heatmap -->
                 <div class="card">
-                    <div class="card-label">MOST ACTIVE DAY</div>
-                    <div class="card-value" id="mostActiveDay">-</div>
-                    <div class="card-subtext" id="mostActiveDayNote">-</div>
-                </div>
-
-                <div class="card">
-                    <div class="card-label">WEEKLY ACTIVITY</div>
-                    <div class="weekly-chart" id="weeklyChart"></div>
+                    <div class="chart-title" style="margin-bottom:4px;">Hour of day <span style="font-size:.6rem;color:var(--ink-4);font-weight:400;">(all time, local)</span></div>
+                    <div class="hourly-bars" id="hourly-bars">
+                        <!-- populated by JS -->
+                    </div>
+                    <div class="hourly-labels" id="hourly-labels">
+                        <!-- populated by JS -->
+                    </div>
                 </div>
             </div>
+        </section>
 
-            <!-- Activity Heatmap -->
-            <div class="card" style="margin-bottom: 16px;">
-                <div class="card-label">ACTIVITY HEATMAP</div>
-                <div class="heatmap-container">
+        <!-- ===== SECTION: HEATMAP ===== -->
+        <section class="section reveal" aria-label="Activity heatmap">
+            <div class="section-header">
+                <span class="section-title">Heatmap</span>
+                <span class="section-aside" id="heatmap-days">0 active days</span>
+            </div>
+            <div class="card fade-up d2">
+                <div class="heatmap-wrap">
                     <div class="heatmap-day-labels">
-                        <span></span><span style="font-size: 9px;">Mon</span><span style="font-size: 9px;">Wed</span><span style="font-size: 9px;">Fri</span>
+                        <span></span>
+                        <span>Mon</span>
+                        <span>Wed</span>
+                        <span>Fri</span>
                     </div>
-                    <div class="heatmap" id="heatmap"></div>
-                </div>
-                <div class="heatmap-labels"></div>
-            </div>
-
-            <!-- Heatmap Tooltip -->
-            <div id="heatmap-tooltip" class="heatmap-tooltip" role="tooltip" aria-hidden="true">
-                <div class="tooltip-date"></div>
-                <div class="tooltip-stats">
-                    <div class="stat-row">
-                        <span class="stat-label">Messages</span>
-                        <span class="stat-value messages"></span>
-                    </div>
-                    <div class="stat-row">
-                        <span class="stat-label">Sessions</span>
-                        <span class="stat-value sessions"></span>
-                    </div>
-                    <div class="stat-row">
-                        <span class="stat-label">Tools</span>
-                        <span class="stat-value tools"></span>
-                    </div>
-                    <div class="stat-row">
-                        <span class="stat-label">Tokens</span>
-                        <span class="stat-value tokens"></span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Row 5: Timeline Charts -->
-            <div class="card full-width" style="margin-bottom: 16px;">
-                <div class="card-label">DAILY ACTIVITY TIMELINE</div>
-                <div class="chart-container">
-                    <canvas id="dailyActivityChart"></canvas>
-                </div>
-            </div>
-
-            <div class="grid" style="margin-bottom: 16px;">
-                <div class="chart-card">
-                    <div class="chart-title">TOKENS PER DAY</div>
-                    <div class="chart-container">
-                        <canvas id="tokensPerDayChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="chart-card">
-                    <div class="chart-title">MESSAGES PER DAY</div>
-                    <div class="chart-container">
-                        <canvas id="messagesPerDayChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card full-width" style="margin-bottom: 16px;">
-                <div class="card-label">MODEL SWITCHING TIMELINE</div>
-                <div class="chart-container">
-                    <canvas id="modelSwitchingChart"></canvas>
-                </div>
-            </div>
-
-            <!-- Row 7: AI-Powered Suggestions -->
-            <div class="card" style="margin-top: 16px;">
-                <div class="card-label">WAYS TO GET MORE FROM CLAUDE CODE</div>
-                <div class="suggestions-grid" id="suggestionsGrid">
-                    <!-- Suggestions populated by JS -->
-                </div>
-            </div>
-
-            <!-- Glossary Section -->
-            <div class="card expandable-card" style="margin-top: 16px;">
-                <div class="card-header">
                     <div>
-                        <div class="card-label-expandable">GLOSSARY</div>
-                        <div class="card-subtext dark">Understanding your stats</div>
+                        <div class="heatmap" id="heatmap"></div>
+                        <div class="heatmap-month-labels" id="heatmap-month-labels"></div>
                     </div>
-                    <button class="expand-btn" aria-expanded="false">
-                        <span class="expand-text">Show Terms</span>
-                        <span class="expand-icon">▼</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== SECTION: INSIGHTS LOG ===== -->
+        <section class="section reveal" aria-label="Weekly insights log" id="insights-section">
+            <div class="section-header">
+                <div>
+                    <span class="section-title-main">Weekly Insights</span>
+                    <div class="section-aside" style="margin-top:2px;">Durable review log. Add entries with <code style="font-family:'IBM Plex Mono',monospace;font-size:.7rem;background:var(--bg-inset);padding:1px 5px;border-radius:3px;">node add-insight.js --file review.json</code></div>
+                </div>
+                <span class="section-aside" id="insights-count">-- entries</span>
+            </div>
+
+            <!-- Trend strip (shows when > 1 entry) -->
+            <div id="insights-trend-wrap" style="margin-bottom:16px;display:none;">
+                <div class="insights-trend">
+                    <div class="insights-trend-title">Weekly message trend</div>
+                    <div class="trend-canvas-wrap">
+                        <canvas id="insightsTrendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Insight cards (newest first) -->
+            <div class="insights-grid" id="insights-grid">
+                <!-- populated by JS -->
+            </div>
+
+            <div id="insights-empty" style="display:none;" class="card" style="text-align:center;padding:40px;">
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:.813rem;color:var(--ink-3);">No insights yet. Add your first weekly review with <code>node add-insight.js --file review.json</code></div>
+            </div>
+        </section>
+
+        <!-- ===== SECTION: SUGGESTIONS ===== -->
+        <section class="section reveal" aria-label="Usage suggestions">
+            <div class="section-header">
+                <span class="section-title">Ways to get more from Claude Code</span>
+            </div>
+            <div class="suggestion-grid fade-up d2" id="suggestions-grid">
+                <!-- populated by JS -->
+            </div>
+        </section>
+
+        <!-- ===== SECTION: GLOSSARY ===== -->
+        <section class="section reveal" aria-label="Glossary">
+            <div class="card" style="margin-top:8px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <div>
+                        <span class="chart-title" style="color:var(--coral);">Glossary</span>
+                        <div style="font-size:.75rem;color:var(--ink-3);margin-top:2px;">Understanding your stats</div>
+                    </div>
+                    <button class="expand-btn" aria-expanded="false" id="glossary-btn">
+                        <span>Show</span> <span>▼</span>
                     </button>
                 </div>
-                <div class="card-content collapsed">
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; padding: 16px 0;">
-                        <div>
-                            <h4 class="glossary-term">Session</h4>
-                            <p class="glossary-def">A coding session represents one interaction with Claude Code, from when you start until you close or switch contexts. Includes all messages and tool calls.</p>
-                        </div>
-                        <div>
-                            <h4 class="glossary-term">Message</h4>
-                            <p class="glossary-def">Each message is an exchange between you and Claude - your prompts, questions, or commands and Claude's responses.</p>
-                        </div>
-                        <div>
-                            <h4 class="glossary-term">Tokens</h4>
-                            <p class="glossary-def">Tokens are the basic unit of text processing. Roughly, 1 token ≈ 4 characters. Used for billing and model context limits.</p>
-                        </div>
-                        <div>
-                            <h4 class="glossary-term">Input Tokens</h4>
-                            <p class="glossary-def">Tokens in your messages, prompts, and files you share. These are processed by Claude to understand your request.</p>
-                        </div>
-                        <div>
-                            <h4 class="glossary-term">Output Tokens</h4>
-                            <p class="glossary-def">Tokens in Claude's responses. Generally cost more than input tokens.</p>
-                        </div>
-                        <div>
-                            <h4 class="glossary-term">Cache Read</h4>
-                            <p class="glossary-def">When Claude reuses previously processed context from cache. Costs ~90% less than processing new tokens.</p>
-                        </div>
-                        <div>
-                            <h4 class="glossary-term">Cache Write</h4>
-                            <p class="glossary-def">When new context is stored in cache for reuse. Slightly more expensive upfront but saves money on repeated exchanges.</p>
-                        </div>
-                        <div>
-                            <h4 class="glossary-term">Cache Hit Rate</h4>
-                            <p class="glossary-def">Percentage of cache tokens that are read from cache vs. newly computed. Higher = more cost efficient.</p>
-                        </div>
-                        <div>
-                            <h4 class="glossary-term">Tool Calls</h4>
-                            <p class="glossary-def">Actions Claude performs on your behalf - reading files, running commands, searching the web, etc.</p>
-                        </div>
-                        <div>
-                            <h4 class="glossary-term">Streak</h4>
-                            <p class="glossary-def">Consecutive days where you had at least one session. Shows consistency in your coding workflow.</p>
-                        </div>
+                <div class="card-content collapsed" id="glossary-content">
+                    <div class="glossary-grid">
+                        <div><h4 class="glossary-term">Session</h4><p class="glossary-def">One interaction with Claude Code, start to close. Includes all messages and tool calls.</p></div>
+                        <div><h4 class="glossary-term">Message</h4><p class="glossary-def">Each exchange between you and Claude: your prompts and Claude's responses.</p></div>
+                        <div><h4 class="glossary-term">Tokens</h4><p class="glossary-def">The basic unit of text processing. Roughly 1 token ≈ 4 characters.</p></div>
+                        <div><h4 class="glossary-term">Input Tokens</h4><p class="glossary-def">Tokens in your messages, prompts, and files you share.</p></div>
+                        <div><h4 class="glossary-term">Output Tokens</h4><p class="glossary-def">Tokens in Claude's responses. Generally cost more than input tokens.</p></div>
+                        <div><h4 class="glossary-term">Cache Read</h4><p class="glossary-def">When Claude reuses previously processed context. Costs ~90% less than new tokens.</p></div>
+                        <div><h4 class="glossary-term">Cache Write</h4><p class="glossary-def">When new context is stored in cache. Slightly more expensive upfront but saves on reruns.</p></div>
+                        <div><h4 class="glossary-term">Cache Hit Rate</h4><p class="glossary-def">Percentage of cache tokens read vs. newly computed. Higher = more cost efficient.</p></div>
+                        <div><h4 class="glossary-term">Tool Calls</h4><p class="glossary-def">Actions Claude performs: reading files, running commands, searching the web, etc.</p></div>
+                        <div><h4 class="glossary-term">Streak</h4><p class="glossary-def">Consecutive days with at least one session. Shows consistency in your workflow.</p></div>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
+
+    </div><!-- /.page-wrap -->
+</div><!-- /#dashboard -->
+
+<!-- HEATMAP TOOLTIP -->
+<div id="hm-tooltip" class="hm-tooltip" role="tooltip" aria-hidden="true">
+    <div class="hm-tooltip-date" id="hm-tt-date"></div>
+    <div class="hm-tooltip-rows">
+        <div class="hm-tooltip-row"><span class="hm-tooltip-lbl">Messages</span><span class="hm-tooltip-val msg" id="hm-tt-msg">0</span></div>
+        <div class="hm-tooltip-row"><span class="hm-tooltip-lbl">Sessions</span><span class="hm-tooltip-val ses" id="hm-tt-ses">0</span></div>
+        <div class="hm-tooltip-row"><span class="hm-tooltip-lbl">Tokens</span><span class="hm-tooltip-val tok" id="hm-tt-tok">0</span></div>
     </div>
+</div>
 
-    <!-- Modal -->
-    <div id="modal" class="modal" role="dialog" aria-hidden="true">
-        <div class="modal-overlay" onclick="closeModal()"></div>
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modal-title"></h2>
-                <button class="close-btn" onclick="closeModal()">✕</button>
-            </div>
-            <div id="modal-body"></div>
+<!-- MODAL -->
+<div id="modal" class="modal" role="dialog" aria-hidden="true">
+    <div class="modal-overlay" onclick="DashboardUtils.closeModal()"></div>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modal-title"></h2>
+            <button class="close-btn" onclick="DashboardUtils.closeModal()">&#x2715;</button>
         </div>
+        <div id="modal-body"></div>
     </div>
+</div>
 
-    <script src="dashboard-common.js"></script>
-    <script>
-        // Theme management
-        let currentTheme = localStorage.getItem('theme') || 'light';
-        let colors = DashboardUtils.COLORS[currentTheme];
-        let statsData = null;
-        let charts = {};
-        let dailyDataLookup = null;
+<script src="dashboard-common.js"></script>
+<script>
+/* ================================================================
+   My Claude Activity — main dashboard script
+   Redesigned Phase 2. Vanilla ES5/ES6 modules, no bundler.
+================================================================ */
+'use strict';
 
-        // Apply theme to document
-        function applyTheme(theme) {
-            document.documentElement.setAttribute('data-theme', theme);
-            const themeIcon = document.querySelector('.theme-icon');
-            if (themeIcon) {
-                themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
-            }
-            colors = DashboardUtils.COLORS[theme];
+// ---- State -------------------------------------------------------------------
+let currentTheme  = localStorage.getItem('theme') || 'light';
+let currentAccount = 'merged';   // 'merged' | 'personal' | 'fho'
+let statsData     = null;
+let insightsData  = null;
+let dailyLookup   = null;
+let charts        = {};
 
-            // Update chart colors
-            Object.values(charts).forEach(chart => {
-                if (chart && chart.options) {
-                    chart.options.plugins.legend.labels.color = colors.textSecondary;
-                    if (chart.options.scales.x) {
-                        chart.options.scales.x.grid.color = colors.grid;
-                        chart.options.scales.x.ticks.color = colors.textSecondary;
-                    }
-                    if (chart.options.scales.y) {
-                        chart.options.scales.y.grid.color = colors.grid;
-                        chart.options.scales.y.ticks.color = colors.textSecondary;
-                    }
-                    chart.update('none');
-                }
-            });
+// ---- Theme -------------------------------------------------------------------
+function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    document.getElementById('theme-icon').textContent = theme === 'dark' ? '☀️' : '🌙';
+
+    const isDark = theme === 'dark';
+    const gridColor  = isDark ? '#242420' : '#E8E6E1';
+    const tickColor  = isDark ? '#666660' : '#888880';
+    const ttBg       = isDark ? '#202020' : '#111111';
+
+    Object.values(charts).forEach(chart => {
+        if (!chart || !chart.options) return;
+        if (chart.options.plugins?.legend?.labels)
+            chart.options.plugins.legend.labels.color = tickColor;
+        if (chart.options.plugins?.tooltip) {
+            chart.options.plugins.tooltip.backgroundColor = ttBg;
         }
-
-        // Toggle theme
-        function toggleTheme() {
-            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
-            localStorage.setItem('theme', currentTheme);
-            applyTheme(currentTheme);
+        if (chart.options.scales?.x) {
+            chart.options.scales.x.grid.color   = gridColor;
+            chart.options.scales.x.ticks.color  = tickColor;
         }
-
-        // PHASE 4: Keyboard shortcuts
-        document.addEventListener('keydown', (e) => {
-            // Cmd/Ctrl + Shift + D: Toggle dark/light mode
-            if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'D') {
-                e.preventDefault();
-                toggleTheme();
-            }
-
-            // Escape: Close any open expandable sections
-            if (e.key === 'Escape') {
-                document.querySelectorAll('.card-content.expanded').forEach(content => {
-                    content.classList.remove('expanded');
-                    content.classList.add('collapsed');
-                });
-                document.querySelectorAll('.expand-btn').forEach(btn => {
-                    btn.querySelector('.expand-text').textContent = 'Show Details';
-                    btn.querySelector('.expand-icon').style.transform = 'rotate(0deg)';
-                    btn.setAttribute('aria-expanded', 'false');
-                });
-            }
-        });
-
-        // Auto-load from data.json on page load
-        window.addEventListener('DOMContentLoaded', async () => {
-            applyTheme(currentTheme);
-
-            // Set up theme toggle button
-            const themeToggle = document.getElementById('themeToggle');
-            if (themeToggle) {
-                themeToggle.addEventListener('click', toggleTheme);
-            }
-
-            await loadFromFile();
-            DashboardUtils.initExpandableCards();
-        });
-
-        async function loadFromFile() {
-            try {
-                statsData = await DashboardUtils.loadStatsData();
-                document.getElementById('loadSection').style.display = 'none';
-                document.getElementById('dashboard').classList.add('loaded');
-                renderDashboard();
-            } catch (e) {
-                document.getElementById('loadSection').innerHTML = `
-                    <div class="header-icon">⭐</div>
-                    <h1>My Claude Activity</h1>
-                    <p style="margin-top: 30px;">Could not load stats. Run: ./serve.sh</p>
-                    <div class="error" style="display: block;">${e.message}</div>
-                `;
-            }
+        if (chart.options.scales?.y) {
+            chart.options.scales.y.grid.color   = gridColor;
+            chart.options.scales.y.ticks.color  = tickColor;
         }
+        chart.update('none');
+    });
+}
 
-        function renderDashboard() {
-            if (!statsData || !statsData.dailyActivity) return;
+function toggleTheme() {
+    currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+    localStorage.setItem('theme', currentTheme);
+    applyTheme(currentTheme);
+}
 
-            const activity = statsData.dailyActivity;
+document.getElementById('themeToggle').addEventListener('click', toggleTheme);
 
-            // Prepare daily data with tokens
-            const dailyData = activity.map(day => {
-                const tokenData = statsData.dailyModelTokens?.find(d => d.date === day.date);
-                const tokens = tokenData ? Object.values(tokenData.tokensByModel || {}).reduce((s, v) => s + v, 0) : 0;
-                return {
-                    date: day.date,
-                    messages: day.messageCount,
-                    sessions: day.sessionCount,
-                    tools: day.toolCallCount,
-                    tokens: tokens
-                };
-            });
+document.addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'D') {
+        e.preventDefault();
+        toggleTheme();
+    }
+    if (e.key === 'Escape') DashboardUtils.closeModal();
+});
 
-            // Create lookup map for efficient tooltip data access
-            dailyDataLookup = new Map();
-            dailyData.forEach(day => {
-                dailyDataLookup.set(day.date, day);
-            });
+// ---- Account filter ----------------------------------------------------------
+function switchAccount(account) {
+    // FHO is disabled if no data
+    const hasFho = statsData && statsData.byAccount && statsData.byAccount.fho;
+    if (account === 'fho' && !hasFho) return;
 
-            // Calculate statistics
-            const totalMessages = activity.reduce((sum, day) => sum + day.messageCount, 0);
-            const totalSessions = activity.reduce((sum, day) => sum + day.sessionCount, 0);
-            const totalToolCalls = activity.reduce((sum, day) => sum + day.toolCallCount, 0);
-            const avgPerSession = totalSessions > 0 ? Math.round(totalMessages / totalSessions) : 0;
-            const totalTokens = dailyData.reduce((sum, d) => sum + d.tokens, 0);
-            const activeDays = dailyData.filter(d => d.tokens > 0).length;
-            const avgTokensPerDay = activeDays > 0 ? Math.round(totalTokens / activeDays) : 0;
+    currentAccount = account;
+    document.querySelectorAll('.account-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.account === account);
+    });
 
-            // Journey date
-            const firstDate = activity[0]?.date || new Date().toISOString();
-            const journeyDate = new Date(firstDate);
-            const daysAgo = Math.floor((new Date() - journeyDate) / (1000 * 60 * 60 * 24));
+    if (statsData) renderDashboard();
+}
 
-            // journeyDate is now in the compact card
-            animateValue('journeyDate', DashboardUtils.formatDate(journeyDate));
+// ---- Boot -------------------------------------------------------------------
+window.addEventListener('DOMContentLoaded', async () => {
+    applyTheme(currentTheme);
 
-            // Most active day
-            const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-            const dayActivity = {};
-            activity.forEach(d => {
-                const dayName = dayNames[new Date(d.date).getDay()];
-                dayActivity[dayName] = (dayActivity[dayName] || 0) + d.messageCount;
-            });
-            const mostActiveDay = Object.entries(dayActivity).sort((a, b) => b[1] - a[1])[0];
-            document.getElementById('mostActiveDay').textContent = mostActiveDay ? mostActiveDay[0] : '-';
-            document.getElementById('mostActiveDayNote').textContent = mostActiveDay ? `You love ${mostActiveDay[0]}s!` : '-';
+    // Topbar date
+    const now = new Date();
+    document.getElementById('topbar-date').textContent =
+        now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
-            // Weekly chart
-            renderWeeklyChart(dayActivity);
+    // Load both in parallel; render only after both are ready
+    await Promise.all([loadStats(), loadInsights()]);
 
-            // Heatmap
-            renderHeatmap(activity);
+    if (statsData) {
+        document.getElementById('loadSection').style.display = 'none';
+        document.getElementById('dashboard').classList.add('loaded');
+        renderDashboard();
+    }
 
-            // Timeline charts
-            renderDailyActivityChart(dailyData);
-            renderTokensPerDayChart(dailyData);
-            renderMessagesPerDayChart(dailyData);
-            renderModelSwitchingChart();
+    setupScrollReveal();
+    setupGlossaryToggle();
+});
 
-            // Cache efficiency
-            renderCacheEfficiency();
+async function loadStats() {
+    try {
+        statsData = await DashboardUtils.loadStatsData();
 
-            // Model details
-            renderModelDetails();
-
-            // Suggestions
-            renderSuggestions();
-
-            // Stats
-            animateValue('totalSessions', totalSessions.toLocaleString());
-            animateValue('totalMessages', totalMessages.toLocaleString());
-            animateValue('totalTokens', DashboardUtils.formatTokens(totalTokens));
-            animateValue('currentStreak', DashboardUtils.calculateStreak(activity));
-            document.getElementById('avgPerSession').textContent = avgPerSession;
-            animateValue('totalTools', totalToolCalls.toLocaleString());
-            animateValue('avgTokensPerDay', DashboardUtils.formatTokens(avgTokensPerDay));
-
-            // Token breakdown
-            const cacheStats = DashboardUtils.calculateCacheStats(statsData.modelUsage);
-            document.getElementById('cacheReadTokens').textContent = DashboardUtils.formatTokens(cacheStats.cacheRead);
-            document.getElementById('cacheWriteTokens').textContent = DashboardUtils.formatTokens(cacheStats.cacheWrite);
-            // Also update the small values in CACHE EFFICIENCY card
-            document.getElementById('cacheReadTokensSmall').textContent = DashboardUtils.formatTokens(cacheStats.cacheRead);
-            document.getElementById('cacheWriteTokensSmall').textContent = DashboardUtils.formatTokens(cacheStats.cacheWrite);
-
-            // Calculate input and output tokens from model usage
-            let totalInput = 0;
-            let totalOutput = 0;
-            if (statsData.modelUsage) {
-                // modelUsage is an object, not an array
-                Object.values(statsData.modelUsage).forEach(model => {
-                    totalInput += model.inputTokens || 0;
-                    totalOutput += model.outputTokens || 0;
-                });
-            }
-            document.getElementById('totalInputTokens').textContent = DashboardUtils.formatTokens(totalInput);
-            document.getElementById('totalOutputTokens').textContent = DashboardUtils.formatTokens(totalOutput);
+        // FHO button: grey out if no data
+        const hasFho = statsData.byAccount && statsData.byAccount.fho;
+        const fhoBtn = document.querySelector('[data-account="fho"]');
+        if (!hasFho) {
+            fhoBtn.title = 'No FHO sessions yet';
+            fhoBtn.classList.add('disabled-fho');
+        } else {
+            fhoBtn.classList.remove('disabled-fho');
         }
+    } catch (e) {
+        const wrap = document.createElement('div');
+        wrap.className = 'load-screen page-wrap';
+        const icon  = document.createElement('div');
+        icon.style.fontSize = '32px';
+        icon.textContent = '⚡';
+        const title = document.createElement('div');
+        title.className = 'load-screen-title';
+        title.textContent = 'My Claude Activity';
+        const sub   = document.createElement('div');
+        sub.className = 'load-screen-sub';
+        sub.textContent = 'Could not load stats. Run: ./serve.sh';
+        const msg   = document.createElement('div');
+        msg.className = 'error-msg';
+        msg.textContent = e.message;
+        wrap.append(icon, title, sub, msg);
+        const section = document.getElementById('loadSection');
+        section.innerHTML = '';
+        section.appendChild(wrap);
+    }
+}
 
-        function animateValue(elementId, value) {
-            const el = document.getElementById(elementId);
-            if (!el) return;
-            el.textContent = value;
-            el.classList.add('animate-in');
-        }
+async function loadInsights() {
+    try {
+        const res = await fetch('insights-log.json');
+        if (!res.ok) throw new Error('No insights');
+        insightsData = await res.json();
+    } catch (_) {
+        insightsData = [];
+    }
+}
 
-        function renderWeeklyChart(dayActivity) {
-            const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-            const dayOrder = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-            const maxVal = Math.max(...Object.values(dayActivity));
+// ---- Data helpers -----------------------------------------------------------
+function getActiveData() {
+    if (!statsData) return null;
 
-            const chart = document.getElementById('weeklyChart');
-            chart.innerHTML = '';
+    if (currentAccount === 'merged') {
+        return {
+            totalSessions:   statsData.totalSessions || 0,
+            totalMessages:   statsData.totalMessages || 0,
+            totalTokens:     computeTotalTokens(statsData),
+            totalToolCalls:  computeTotalTools(statsData),
+            dailyActivity:   statsData.dailyActivity || [],
+            modelUsage:      statsData.modelUsage || {},
+            hourCounts:      statsData.hourCounts || {},
+            longestSession:  statsData.longestSession,
+            firstSessionDate:statsData.firstSessionDate,
+        };
+    }
 
-            dayOrder.forEach((day, i) => {
-                const val = dayActivity[day] || 0;
-                const height = maxVal > 0 ? (val / maxVal) * 100 : 0;
-                const bar = document.createElement('div');
-                bar.className = 'bar';
-                bar.style.height = '0%';
-                bar.innerHTML = `<span class="bar-label">${days[i]}</span>`;
-                chart.appendChild(bar);
+    const acc = statsData.byAccount?.[currentAccount];
+    if (!acc) return null;
 
-                // Animate
-                setTimeout(() => {
-                    bar.style.transition = 'height 0.8s ease-out';
-                    bar.style.height = `${height}%`;
-                }, 50 + i * 100);
-            });
-        }
+    return {
+        totalSessions:   acc.totalSessions   || 0,
+        totalMessages:   acc.totalMessages   || 0,
+        totalTokens:     acc.totalTokens     || 0,
+        totalToolCalls:  acc.totalToolCalls  || 0,
+        dailyActivity:   statsData.dailyActivity || [],  // filtered below
+        modelUsage:      statsData.modelUsage   || {},
+        hourCounts:      statsData.hourCounts   || {},
+        longestSession:  statsData.longestSession,
+        firstSessionDate:statsData.firstSessionDate,
+    };
+}
 
-        function renderHeatmap(activity) {
-            const heatmap = document.getElementById('heatmap');
-            const labelsContainer = document.querySelector('.heatmap-labels');
-            heatmap.innerHTML = '';
-            labelsContainer.innerHTML = '';
+function computeTotalTokens(sd) {
+    if (!sd.dailyModelTokens) return 0;
+    return sd.dailyModelTokens.reduce((sum, d) =>
+        sum + Object.values(d.tokensByModel || {}).reduce((s, v) => s + v, 0), 0);
+}
 
-            const startDate = new Date(activity[0]?.date || new Date());
-            // Get the first day of the week (Sunday) for the start date
-            const startDay = startDate.getDay();
-            const firstSunday = new Date(startDate);
-            firstSunday.setDate(startDate.getDate() - startDay);
+function computeTotalTools(sd) {
+    return (sd.dailyActivity || []).reduce((sum, d) => sum + (d.toolCallCount || 0), 0);
+}
 
-            // Track month boundaries
-            const monthStarts = new Map(); // month -> first week index
-            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                            'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+// ---- Render -----------------------------------------------------------------
+function renderDashboard() {
+    const data = getActiveData();
+    if (!data) return;
 
-            for (let week = 0; week < 52; week++) {
-                for (let day = 0; day < 7; day++) {
-                    const cell = document.createElement('div');
-                    cell.className = 'heatmap-cell';
+    const { dailyActivity, modelUsage, hourCounts } = data;
+    const activity = dailyActivity;
 
-                    const cellDate = new Date(firstSunday);
-                    cellDate.setDate(firstSunday.getDate() + (week * 7) + day);
-                    const dateStr = cellDate.toISOString().split('T')[0];
+    // Build daily data with tokens
+    const dailyData = activity.map(day => {
+        const tDay = statsData.dailyModelTokens?.find(d => d.date === day.date);
+        const tokens = tDay
+            ? Object.values(tDay.tokensByModel || {}).reduce((s, v) => s + v, 0)
+            : (day.totalTokens || 0);
+        return {
+            date:     day.date,
+            messages: day.messageCount,
+            sessions: day.sessionCount,
+            tools:    day.toolCallCount,
+            tokens
+        };
+    });
 
-                    // Track first occurrence of each month
-                    const month = cellDate.getMonth();
-                    if (!monthStarts.has(month)) {
-                        monthStarts.set(month, week);
-                    }
+    dailyLookup = new Map(dailyData.map(d => [d.date, d]));
 
-                    const dayData = activity.find(d => d.date === dateStr);
-                    if (dayData && dayData.messageCount > 0) {
-                        cell.classList.add('active');
-                        const maxMsg = Math.max(...activity.map(d => d.messageCount));
-                        const level = Math.ceil((dayData.messageCount / maxMsg) * 5);
-                        cell.classList.add(`level-${Math.min(level, 5)}`);
-                        cell.dataset.date = dateStr;
-                        cell.title = `${dateStr}: ${dayData.messageCount} messages`;
+    const totalMessages   = data.totalMessages;
+    const totalSessions   = data.totalSessions;
+    const totalTokens     = data.totalTokens;
+    const totalToolCalls  = data.totalToolCalls;
+    const activeDays      = dailyData.filter(d => d.tokens > 0 || d.messages > 0).length;
+    const avgPerSession   = totalSessions > 0 ? Math.round(totalMessages / totalSessions) : 0;
+    const avgTokensPerDay = activeDays > 0 ? Math.round(totalTokens / activeDays) : 0;
 
-                        // Add event listeners for custom tooltip
-                        cell.addEventListener('mouseenter', (e) => showHeatmapTooltip(e, dateStr));
-                        cell.addEventListener('mouseleave', hideHeatmapTooltip);
-                    } else {
-                        cell.title = dateStr;
-                    }
+    // Hero headline
+    const recentWeek = activity.slice(-7);
+    const recentMessages = recentWeek.reduce((s, d) => s + d.messageCount, 0);
+    const recentSessions = recentWeek.reduce((s, d) => s + d.sessionCount, 0);
+    document.getElementById('hero-headline').innerHTML =
+        `<span class="hl">${DashboardUtils.formatNumber(recentMessages)}</span> messages across ` +
+        `<span class="hl-teal">${recentSessions}</span> sessions last 7 days`;
 
-                    heatmap.appendChild(cell);
-                }
-            }
+    // Hero KPIs
+    document.getElementById('kpi-sessions').textContent = DashboardUtils.formatNumber(totalSessions);
+    document.getElementById('kpi-messages').textContent = DashboardUtils.formatNumber(totalMessages);
+    document.getElementById('kpi-tokens').textContent   = DashboardUtils.formatTokens(totalTokens);
+    document.getElementById('kpi-tools').textContent    = DashboardUtils.formatNumber(totalToolCalls);
+    const accountLabel = currentAccount === 'merged' ? 'all accounts' : currentAccount;
+    document.getElementById('kpi-sessions-sub').textContent = accountLabel;
 
-            // Generate positioned month labels
-            // Cell width (12px) + gap (3px) = 15px per week column
-            monthStarts.forEach((weekIndex, monthIndex) => {
-                const label = document.createElement('span');
-                label.textContent = months[monthIndex];
-                label.style.left = `${weekIndex * 15}px`;
-                labelsContainer.appendChild(label);
-            });
-        }
+    // Overview stats
+    const streak = DashboardUtils.calculateStreak(activity);
+    document.getElementById('stat-streak').textContent      = streak;
+    document.getElementById('stat-avg-session').textContent = avgPerSession;
+    document.getElementById('stat-avg-tokens').textContent  = DashboardUtils.formatTokens(avgTokensPerDay);
 
-        function showHeatmapTooltip(event, dateStr) {
-            const tooltip = document.getElementById('heatmap-tooltip');
-            const dateEl = tooltip.querySelector('.tooltip-date');
-            const messagesEl = tooltip.querySelector('.stat-value.messages');
-            const sessionsEl = tooltip.querySelector('.stat-value.sessions');
-            const toolsEl = tooltip.querySelector('.stat-value.tools');
-            const tokensEl = tooltip.querySelector('.stat-value.tokens');
+    const longest = data.longestSession;
+    if (longest) {
+        document.getElementById('stat-longest').textContent    = DashboardUtils.formatDuration(longest.duration);
+        document.getElementById('stat-longest-sub').textContent = `${longest.messageCount} messages`;
+    }
 
-            const dayData = dailyDataLookup.get(dateStr);
+    const firstDate = data.firstSessionDate || (activity[0]?.date + 'T00:00:00Z');
+    const fd = new Date(firstDate);
+    const daysAgo = Math.round((Date.now() - fd.getTime()) / 86400000);
+    document.getElementById('stat-started').textContent     = DashboardUtils.formatDate(fd.toISOString().split('T')[0]);
+    document.getElementById('stat-started-sub').textContent = `${daysAgo} days ago`;
 
-            if (!dayData) {
-                dateEl.textContent = DashboardUtils.formatDate(dateStr);
-                messagesEl.textContent = '0';
-                sessionsEl.textContent = '0';
-                toolsEl.textContent = '0';
-                tokensEl.textContent = '0';
-            } else {
-                dateEl.textContent = DashboardUtils.formatDate(dateStr);
-                messagesEl.textContent = DashboardUtils.formatNumber(dayData.messages);
-                sessionsEl.textContent = dayData.sessions.toString();
-                toolsEl.textContent = DashboardUtils.formatNumber(dayData.tools);
-                tokensEl.textContent = DashboardUtils.formatTokens(dayData.tokens);
-            }
+    // Timeline range
+    if (activity.length > 0) {
+        const first = activity[0].date;
+        const last  = activity[activity.length - 1].date;
+        document.getElementById('timeline-range').textContent =
+            `${DashboardUtils.formatDate(first)} — ${DashboardUtils.formatDate(last)}`;
+    }
 
-            tooltip.classList.add('visible');
-            positionTooltip(event);
-        }
+    // Charts
+    renderActivityChart(dailyData);
+    renderTokensChart(dailyData);
+    renderDayBars(activity);
+    renderHourlyBars(hourCounts);
+    renderHeatmap(activity);
+    renderTokenBreakdown(modelUsage);
+    renderModelList(modelUsage);
+    renderSuggestions(activity, modelUsage);
+    renderInsights();
 
-        function hideHeatmapTooltip() {
-            const tooltip = document.getElementById('heatmap-tooltip');
-            tooltip.classList.remove('visible');
-        }
+    // Heatmap count
+    const activeDayCount = activity.filter(d => d.messageCount > 0).length;
+    document.getElementById('heatmap-days').textContent = `${activeDayCount} active days`;
+}
 
-        function positionTooltip(event) {
-            const tooltip = document.getElementById('heatmap-tooltip');
-            const rect = tooltip.getBoundingClientRect();
-            const padding = 12;
+// ---- Charts -----------------------------------------------------------------
+function chartColors() {
+    const dark = currentTheme === 'dark';
+    return {
+        coral:     dark ? '#E06050' : '#C94F3A',
+        teal:      dark ? '#3ABEBE' : '#1D8A8A',
+        grid:      dark ? '#242420' : '#E8E6E1',
+        tick:      dark ? '#666660' : '#888880',
+        ttBg:      dark ? '#202020' : '#111111',
+        textPrimary: dark ? '#F0EFEC' : '#0F0F0F',
+    };
+}
 
-            let left = event.clientX + padding;
-            let top = event.clientY + padding;
+function renderActivityChart(dailyData) {
+    const ctx = document.getElementById('activityChart').getContext('2d');
+    if (charts.activity) charts.activity.destroy();
 
-            // Prevent overflow on right edge
-            if (left + rect.width > window.innerWidth - padding) {
-                left = event.clientX - rect.width - padding;
-            }
+    const c = chartColors();
+    const labels = dailyData.map(d => {
+        const dt = new Date(d.date);
+        return dt.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' });
+    });
 
-            // Prevent overflow on bottom edge
-            if (top + rect.height > window.innerHeight - padding) {
-                top = event.clientY - rect.height - padding;
-            }
-
-            // Prevent overflow on left edge
-            if (left < padding) {
-                left = padding;
-            }
-
-            // Prevent overflow on top edge
-            if (top < padding) {
-                top = padding;
-            }
-
-            tooltip.style.left = `${left}px`;
-            tooltip.style.top = `${top}px`;
-        }
-
-        function renderDailyActivityChart(dailyData) {
-            const ctx = document.getElementById('dailyActivityChart').getContext('2d');
-
-            const labels = dailyData.map(d => {
-                const date = new Date(d.date);
-                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-            });
-
-            if (charts.dailyActivity) charts.dailyActivity.destroy();
-
-            charts.dailyActivity = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: 'Messages',
-                            data: dailyData.map(d => d.messages),
-                            borderColor: colors.accent,
-                            backgroundColor: colors.accent + '20',
-                            fill: true,
-                            tension: 0.4,
-                            pointRadius: 0,
-                            pointHoverRadius: 6
-                        },
-                        {
-                            label: 'Sessions',
-                            data: dailyData.map(d => d.sessions),
-                            borderColor: colors.textSecondary,
-                            backgroundColor: 'transparent',
-                            fill: false,
-                            tension: 0.4,
-                            pointRadius: 0,
-                            pointHoverRadius: 6
-                        },
-                        {
-                            label: 'Tools',
-                            data: dailyData.map(d => d.tools),
-                            borderColor: colors.accentLight,
-                            backgroundColor: 'transparent',
-                            fill: false,
-                            tension: 0.4,
-                            pointRadius: 0,
-                            pointHoverRadius: 6
-                        }
-                    ]
+    charts.activity = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [
+                {
+                    label: 'Messages',
+                    data: dailyData.map(d => d.messages),
+                    borderColor: c.coral,
+                    backgroundColor: c.coral + '18',
+                    fill: true,
+                    tension: 0.35,
+                    pointRadius: 0,
+                    pointHoverRadius: 5,
+                    borderWidth: 2,
+                    order: 1
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: {
-                        duration: 1500,
-                        easing: 'easeOutQuart'
-                    },
-                    interaction: { mode: 'index', intersect: false },
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top',
-                            labels: { boxWidth: 12 }
-                        },
-                        tooltip: {
-                            backgroundColor: colors.card,
-                            titleColor: colors.text,
-                            bodyColor: colors.accent,
-                            borderColor: colors.border,
-                            borderWidth: 1
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: { color: colors.grid },
-                            ticks: { color: colors.textSecondary, maxTicksLimit: 12 }
-                        },
-                        y: {
-                            grid: { color: colors.grid },
-                            ticks: { color: colors.textSecondary },
-                            beginAtZero: true
-                        }
-                    }
+                {
+                    label: 'Sessions',
+                    data: dailyData.map(d => d.sessions),
+                    borderColor: c.teal,
+                    backgroundColor: 'transparent',
+                    fill: false,
+                    tension: 0.35,
+                    pointRadius: 0,
+                    pointHoverRadius: 5,
+                    borderWidth: 1.5,
+                    borderDash: [4, 3],
+                    order: 2
                 }
-            });
-        }
-
-        function renderTokensPerDayChart(dailyData) {
-            const ctx = document.getElementById('tokensPerDayChart').getContext('2d');
-
-            const labels = dailyData.map(d => {
-                const date = new Date(d.date);
-                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-            });
-
-            if (charts.tokensPerDay) charts.tokensPerDay.destroy();
-
-            charts.tokensPerDay = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Tokens',
-                        data: dailyData.map(d => d.tokens),
-                        backgroundColor: colors.accent + 'cc',
-                        borderColor: colors.accent,
-                        borderWidth: 1,
-                        borderRadius: 4
-                    }]
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: { duration: 1200, easing: 'easeOutQuart' },
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: { color: c.tick, boxWidth: 12, font: { family: 'IBM Plex Mono', size: 11 } }
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: {
-                        duration: 1200,
-                        easing: 'easeOutBounce'
-                    },
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: colors.card,
-                            titleColor: colors.text,
-                            bodyColor: colors.accent,
-                            borderColor: colors.border,
-                            borderWidth: 1,
-                            callbacks: {
-                                label: (item) => `Tokens: ${DashboardUtils.formatTokens(item.raw)}`
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: colors.textSecondary, maxTicksLimit: 8 }
-                        },
-                        y: {
-                            grid: { color: colors.grid },
-                            ticks: {
-                                color: colors.textSecondary,
-                                callback: (value) => DashboardUtils.formatTokens(value)
-                            }
-                        }
-                    }
+                tooltip: {
+                    backgroundColor: c.ttBg,
+                    titleColor: '#FFFFFF',
+                    bodyColor: 'rgba(255,255,255,.7)',
+                    borderColor: 'rgba(255,255,255,.08)',
+                    borderWidth: 1,
+                    padding: 10,
+                    titleFont: { family: 'IBM Plex Mono', size: 11 },
+                    bodyFont:  { family: 'IBM Plex Mono', size: 11 }
                 }
-            });
-        }
-
-        function renderMessagesPerDayChart(dailyData) {
-            const ctx = document.getElementById('messagesPerDayChart').getContext('2d');
-
-            const labels = dailyData.map(d => {
-                const date = new Date(d.date);
-                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-            });
-
-            if (charts.messagesPerDay) charts.messagesPerDay.destroy();
-
-            charts.messagesPerDay = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Messages',
-                        data: dailyData.map(d => d.messages),
-                        backgroundColor: colors.accent + 'cc',
-                        borderColor: colors.accent,
-                        borderWidth: 1,
-                        borderRadius: 4
-                    }]
+            },
+            scales: {
+                x: {
+                    grid: { color: c.grid },
+                    ticks: { color: c.tick, maxTicksLimit: 10, font: { family: 'IBM Plex Mono', size: 10 } }
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: {
-                        duration: 1200,
-                        delay: (context) => context.dataIndex * 30,
-                        easing: 'easeOutBounce'
-                    },
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: colors.card,
-                            titleColor: colors.text,
-                            bodyColor: colors.accent,
-                            borderColor: colors.border,
-                            borderWidth: 1
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: colors.textSecondary, maxTicksLimit: 8 }
-                        },
-                        y: {
-                            grid: { color: colors.grid },
-                            ticks: { color: colors.textSecondary }
-                        }
-                    }
+                y: {
+                    grid: { color: c.grid },
+                    ticks: { color: c.tick, font: { family: 'IBM Plex Mono', size: 10 } },
+                    beginAtZero: true
                 }
-            });
+            }
         }
+    });
+}
 
-        function renderModelSwitchingChart() {
-            const ctx = document.getElementById('modelSwitchingChart').getContext('2d');
+function renderTokensChart(dailyData) {
+    const ctx = document.getElementById('tokensChart').getContext('2d');
+    if (charts.tokens) charts.tokens.destroy();
 
-            if (!statsData.dailyModelTokens) return;
+    const c = chartColors();
+    const labels = dailyData.map(d => {
+        const dt = new Date(d.date);
+        return dt.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' });
+    });
 
-            // Group by consecutive model usage periods
-            const periods = [];
-            let currentModel = null;
-            let startDate = null;
-            let tokenCount = 0;
+    const totalTokens = dailyData.reduce((s, d) => s + d.tokens, 0);
+    document.getElementById('tokens-pill').textContent = DashboardUtils.formatTokens(totalTokens);
 
-            statsData.dailyModelTokens.forEach(day => {
-                const models = Object.keys(day.tokensByModel || {});
-                const primaryModel = models.sort((a, b) =>
-                    (day.tokensByModel[b] || 0) - (day.tokensByModel[a] || 0)
-                )[0];
-
-                if (primaryModel && primaryModel !== currentModel) {
-                    if (currentModel) {
-                        periods.push({
-                            model: currentModel,
-                            start: startDate,
-                            end: new Date(new Date(day.date).getTime() - 86400000),
-                            tokens: tokenCount
-                        });
-                    }
-                    currentModel = primaryModel;
-                    startDate = new Date(day.date);
-                    tokenCount = Object.values(day.tokensByModel || {}).reduce((s, v) => s + v, 0);
-                } else {
-                    tokenCount += Object.values(day.tokensByModel || {}).reduce((s, v) => s + v, 0);
+    charts.tokens = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [{
+                label: 'Tokens',
+                data: dailyData.map(d => d.tokens),
+                backgroundColor: c.coral + 'CC',
+                borderColor: c.coral,
+                borderWidth: 0,
+                borderRadius: 3,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: { duration: 1000, easing: 'easeOutQuart' },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: c.ttBg,
+                    titleColor: '#FFFFFF',
+                    bodyColor: 'rgba(255,255,255,.7)',
+                    borderColor: 'rgba(255,255,255,.08)',
+                    borderWidth: 1,
+                    padding: 10,
+                    titleFont: { family: 'IBM Plex Mono', size: 11 },
+                    bodyFont:  { family: 'IBM Plex Mono', size: 11 },
+                    callbacks: { label: item => `Tokens: ${DashboardUtils.formatTokens(item.raw)}` }
                 }
-            });
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: { color: c.tick, maxTicksLimit: 8, font: { family: 'IBM Plex Mono', size: 10 } }
+                },
+                y: {
+                    grid: { color: c.grid },
+                    ticks: {
+                        color: c.tick,
+                        font: { family: 'IBM Plex Mono', size: 10 },
+                        callback: v => DashboardUtils.formatTokens(v)
+                    }
+                }
+            }
+        }
+    });
+}
 
-            if (currentModel) {
-                periods.push({
-                    model: currentModel,
-                    start: startDate,
-                    end: new Date(),
-                    tokens: tokenCount
-                });
+// ---- Day-of-week bars -------------------------------------------------------
+function renderDayBars(activity) {
+    const dayOrder = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const shortDay = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const dayTotals = {};
+    dayOrder.forEach(d => { dayTotals[d] = 0; });
+    activity.forEach(day => {
+        const name = dayOrder[new Date(day.date).getDay()];
+        dayTotals[name] += day.messageCount;
+    });
+
+    const maxVal = Math.max(...Object.values(dayTotals));
+    const peakDay = Object.entries(dayTotals).sort((a, b) => b[1] - a[1])[0]?.[0];
+    const container = document.getElementById('day-bars');
+    const labelContainer = document.getElementById('day-bar-labels');
+    container.innerHTML = '';
+    labelContainer.innerHTML = '';
+
+    dayOrder.forEach((day, i) => {
+        const val = dayTotals[day] || 0;
+        const pct = maxVal > 0 ? (val / maxVal) * 100 : 0;
+        const isPeak = day === peakDay;
+
+        // Bar column
+        const col = document.createElement('div');
+        col.className = 'day-bar-col';
+        const bar = document.createElement('div');
+        bar.className = 'day-bar' + (isPeak ? ' peak' : '');
+        bar.style.height = '0%';
+        bar.title = `${day}: ${DashboardUtils.formatNumber(val)} messages`;
+        col.appendChild(bar);
+        container.appendChild(col);
+
+        // Animate
+        setTimeout(() => {
+            bar.style.transition = 'height .8s cubic-bezier(0.16,1,0.3,1)';
+            bar.style.height = pct + '%';
+        }, 60 + i * 60);
+
+        // Label
+        const lbl = document.createElement('div');
+        lbl.className = 'day-bar-lbl' + (isPeak ? ' peak' : '');
+        lbl.textContent = shortDay[i];
+        lbl.style.textAlign = 'center';
+        lbl.style.fontFamily = "'IBM Plex Mono', monospace";
+        lbl.style.fontSize = '8px';
+        lbl.style.color = isPeak ? 'var(--coral)' : 'var(--ink-3)';
+        lbl.style.fontWeight = isPeak ? '700' : '400';
+        labelContainer.appendChild(lbl);
+    });
+
+    document.getElementById('pattern-label').textContent = peakDay
+        ? `Most active on ${peakDay}s`
+        : '';
+}
+
+// ---- Hourly bars ------------------------------------------------------------
+function renderHourlyBars(hourCounts) {
+    const container = document.getElementById('hourly-bars');
+    const labelContainer = document.getElementById('hourly-labels');
+    container.innerHTML = '';
+    labelContainer.innerHTML = '';
+
+    const vals = Array.from({ length: 24 }, (_, i) => hourCounts[String(i)] || 0);
+    const maxVal = Math.max(...vals, 1);
+    const peakHour = vals.indexOf(Math.max(...vals));
+
+    vals.forEach((val, i) => {
+        const pct = (val / maxVal) * 100;
+        const isPeak = i === peakHour;
+
+        const bar = document.createElement('div');
+        bar.className = 'hour-bar' + (isPeak ? ' peak' : '');
+        bar.title = `${i}:00 — ${DashboardUtils.formatNumber(val)} sessions`;
+        bar.style.height = '0%';
+        container.appendChild(bar);
+
+        setTimeout(() => {
+            bar.style.transition = 'height .7s cubic-bezier(0.16,1,0.3,1)';
+            bar.style.height = pct + '%';
+        }, 80 + i * 15);
+
+        const lbl = document.createElement('div');
+        lbl.className = 'hour-lbl' + (isPeak ? ' peak' : '');
+        // show label at 0, 6, 12, 18 and peak
+        lbl.textContent = (i % 6 === 0) ? i : (isPeak ? i : '');
+        labelContainer.appendChild(lbl);
+    });
+}
+
+// ---- Heatmap ----------------------------------------------------------------
+function renderHeatmap(activity) {
+    const heatmap = document.getElementById('heatmap');
+    const monthLabelContainer = document.getElementById('heatmap-month-labels');
+    heatmap.innerHTML = '';
+    monthLabelContainer.innerHTML = '';
+
+    const startDate = new Date(activity[0]?.date || new Date());
+    const startDay  = startDate.getDay();
+    const firstSunday = new Date(startDate);
+    firstSunday.setDate(startDate.getDate() - startDay);
+
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const monthStarts = new Map();
+
+    for (let week = 0; week < 52; week++) {
+        for (let day = 0; day < 7; day++) {
+            const cell = document.createElement('div');
+            cell.className = 'heatmap-cell';
+
+            const cellDate = new Date(firstSunday);
+            cellDate.setDate(firstSunday.getDate() + week * 7 + day);
+            const dateStr = cellDate.toISOString().split('T')[0];
+
+            const month = cellDate.getMonth();
+            if (!monthStarts.has(month)) monthStarts.set(month, week);
+
+            const dayData = dailyLookup?.get(dateStr);
+            if (dayData && dayData.messages > 0) {
+                cell.classList.add('active');
+                const maxMsg = Math.max(...(activity.map(d => d.messageCount)), 1);
+                const level  = Math.ceil((dayData.messages / maxMsg) * 5);
+                cell.classList.add(`level-${Math.min(level, 5)}`);
+                cell.addEventListener('mouseenter', e => showHmTooltip(e, dateStr));
+                cell.addEventListener('mouseleave', hideHmTooltip);
             }
 
-            const labels = periods.map(p =>
-                `${p.start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${p.end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
-            );
-
-            const modelColors = {
-                'claude-sonnet-4-5-20250929': '#ff6b47',
-                'claude-opus-4-5-20251101': '#4CAF50',
-                'claude-haiku-4-5-20251001': '#2196F3',
-                'glm-4.7': '#9C27B0',
-                'glm-4.6': '#FFC107',
-                'default': '#666'
-            };
-
-            if (charts.modelSwitching) charts.modelSwitching.destroy();
-
-            charts.modelSwitching = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Tokens',
-                        data: periods.map(p => p.tokens),
-                        backgroundColor: periods.map(p => modelColors[p.model] || modelColors['default']),
-                        borderColor: periods.map(p => modelColors[p.model] || modelColors['default']),
-                        borderWidth: 1,
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: {
-                        duration: 1000,
-                        easing: 'easeOutQuart'
-                    },
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: colors.card,
-                            titleColor: colors.text,
-                            bodyColor: colors.accent,
-                            borderColor: colors.border,
-                            borderWidth: 1,
-                            callbacks: {
-                                title: (items) => {
-                                    const period = periods[items[0].dataIndex];
-                                    return `${DashboardUtils.formatModelName(period.model)}`;
-                                },
-                                label: (item) => `${DashboardUtils.formatTokens(item.raw)} tokens`
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: { color: colors.grid },
-                            ticks: {
-                                color: colors.textSecondary,
-                                callback: (value) => DashboardUtils.formatTokens(value)
-                            }
-                        },
-                        y: {
-                            grid: { display: false },
-                            ticks: {
-                                color: colors.textSecondary,
-                                font: { size: 11 }
-                            }
-                        }
-                    }
-                }
-            });
+            heatmap.appendChild(cell);
         }
+    }
 
-        function renderCacheEfficiency() {
-            const cacheStats = DashboardUtils.calculateCacheStats(statsData.modelUsage);
+    // Month labels
+    monthStarts.forEach((weekIdx, monthIdx) => {
+        const lbl = document.createElement('span');
+        lbl.textContent = months[monthIdx];
+        lbl.style.left = weekIdx * 14 + 'px';
+        monthLabelContainer.appendChild(lbl);
+    });
+}
 
-            document.getElementById('cacheHitRate').textContent = cacheStats.hitRate.toFixed(1) + '%';
-            document.getElementById('cacheProgressBar').style.width = cacheStats.hitRate + '%';
-            document.getElementById('cacheReadTokens').textContent = DashboardUtils.formatTokens(cacheStats.cacheRead);
-            document.getElementById('cacheWriteTokens').textContent = DashboardUtils.formatTokens(cacheStats.cacheWrite);
-            // Also update the small values in CACHE EFFICIENCY card
-            document.getElementById('cacheReadTokensSmall').textContent = DashboardUtils.formatTokens(cacheStats.cacheRead);
-            document.getElementById('cacheWriteTokensSmall').textContent = DashboardUtils.formatTokens(cacheStats.cacheWrite);
-        }
+function showHmTooltip(e, dateStr) {
+    const tt  = document.getElementById('hm-tooltip');
+    const day = dailyLookup?.get(dateStr);
 
-        function renderModelDetails() {
-            if (!statsData.modelUsage) return;
+    document.getElementById('hm-tt-date').textContent = DashboardUtils.formatDate(dateStr);
+    document.getElementById('hm-tt-msg').textContent  = day ? DashboardUtils.formatNumber(day.messages) : '0';
+    document.getElementById('hm-tt-ses').textContent  = day ? String(day.sessions) : '0';
+    document.getElementById('hm-tt-tok').textContent  = day ? DashboardUtils.formatTokens(day.tokens) : '0';
 
-            const models = Object.entries(statsData.modelUsage).map(([modelId, data]) => {
-                const totalTokens = (data.inputTokens || 0) + (data.outputTokens || 0) +
-                                   (data.cacheReadInputTokens || 0) + (data.cacheCreationInputTokens || 0);
-                return {
-                    id: modelId,
-                    name: DashboardUtils.formatModelName(modelId),
-                    tokens: totalTokens,
-                    cost: DashboardUtils.calculateModelCost(modelId, data),
-                    data: data
-                };
-            }).sort((a, b) => b.tokens - a.tokens);
+    tt.classList.add('visible');
+    tt.removeAttribute('aria-hidden');
 
-            const totalCost = models.reduce((sum, m) => sum + m.cost, 0);
+    const pad = 12;
+    let left = e.clientX + pad;
+    let top  = e.clientY + pad;
+    const rect = tt.getBoundingClientRect();
+    if (left + rect.width  > window.innerWidth  - pad) left = e.clientX - rect.width  - pad;
+    if (top  + rect.height > window.innerHeight - pad) top  = e.clientY - rect.height - pad;
+    tt.style.left = Math.max(pad, left) + 'px';
+    tt.style.top  = Math.max(pad, top)  + 'px';
+}
 
-            document.getElementById('modelCount').textContent = `${models.length} models used`;
-            document.getElementById('totalCost').textContent = `Total cost: $${totalCost.toFixed(2)}`;
+function hideHmTooltip() {
+    const tt = document.getElementById('hm-tooltip');
+    tt.classList.remove('visible');
+    tt.setAttribute('aria-hidden', 'true');
+}
 
-            const content = document.getElementById('modelDetailsContent');
-            content.innerHTML = '';
+// ---- Token breakdown --------------------------------------------------------
+function renderTokenBreakdown(modelUsage) {
+    const cacheStats = DashboardUtils.calculateCacheStats(modelUsage);
+    let totalInput = 0, totalOutput = 0;
+    Object.values(modelUsage || {}).forEach(m => {
+        totalInput  += m.inputTokens  || 0;
+        totalOutput += m.outputTokens || 0;
+    });
 
-            models.forEach(model => {
-                const total = model.tokens;
-                const input = model.data.inputTokens || 0;
-                const output = model.data.outputTokens || 0;
-                const cacheRead = model.data.cacheReadInputTokens || 0;
-                const cacheWrite = model.data.cacheCreationInputTokens || 0;
+    const cacheR = cacheStats.cacheRead;
+    const cacheW = cacheStats.cacheWrite;
+    const allMax = Math.max(totalInput, totalOutput, cacheR, cacheW, 1);
 
-                const item = document.createElement('div');
-                item.className = 'model-item';
-                item.innerHTML = `
-                    <div class="model-header">
-                        <span class="model-name">${model.name}</span>
-                        <span class="model-tokens">${DashboardUtils.formatTokens(model.tokens)}</span>
-                    </div>
-                    <div class="token-breakdown">
-                        ${renderTokenBar('Input', input, total, 'input')}
-                        ${renderTokenBar('Output', output, total, 'output')}
-                        ${renderTokenBar('Cache R', cacheRead, total, 'cache-read')}
-                        ${renderTokenBar('Cache W', cacheWrite, total, 'cache-write')}
-                        <div style="font-size: 11px; color: #999; margin-top: 8px;">
-                            Web searches: ${model.data.webSearchRequests || 0} |
-                            Context: ${model.data.contextWindow || 0} tokens |
-                            Cost: $${model.cost.toFixed(2)}
-                        </div>
-                    </div>
-                `;
-                content.appendChild(item);
-            });
-        }
+    function setBar(id, valId, val) {
+        const pct = (val / allMax) * 100;
+        setTimeout(() => {
+            const el = document.getElementById(id);
+            if (el) el.style.width = pct + '%';
+        }, 400);
+        const vEl = document.getElementById(valId);
+        if (vEl) vEl.textContent = DashboardUtils.formatTokens(val);
+    }
 
-        function renderTokenBar(label, value, total, type) {
-            const pct = total > 0 ? (value / total * 100) : 0;
-            return `
-                <div class="token-bar">
-                    <span class="token-bar-label">${label}</span>
-                    <div class="token-bar-track">
-                        <div class="token-bar-fill ${type}" style="width: ${pct}%"></div>
-                    </div>
-                    <span class="token-bar-value">${DashboardUtils.formatTokens(value)}</span>
+    setBar('tb-input',   'tv-input',   totalInput);
+    setBar('tb-output',  'tv-output',  totalOutput);
+    setBar('tb-cache-r', 'tv-cache-r', cacheR);
+    setBar('tb-cache-w', 'tv-cache-w', cacheW);
+
+    const hitRate = Math.round(cacheStats.hitRate);
+    document.getElementById('cache-hit-rate').textContent = hitRate + '%';
+    setTimeout(() => {
+        const prog = document.getElementById('cache-prog');
+        if (prog) prog.style.width = hitRate + '%';
+    }, 400);
+}
+
+// ---- Model list -------------------------------------------------------------
+function renderModelList(modelUsage) {
+    const container = document.getElementById('model-list');
+    if (!modelUsage || !container) return;
+
+    const totalCost = DashboardUtils.calculateUsageCost(modelUsage);
+    document.getElementById('cost-pill').textContent = '$' + totalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    const models = Object.entries(modelUsage)
+        .map(([id, data]) => ({
+            id,
+            name:   DashboardUtils.formatModelName(id),
+            tokens: (data.inputTokens || 0) + (data.outputTokens || 0) + (data.cacheReadInputTokens || 0),
+            cost:   DashboardUtils.calculateModelCost(id, data),
+        }))
+        .sort((a, b) => b.tokens - a.tokens);
+
+    const maxTokens = models[0]?.tokens || 1;
+
+    const modelColors = [
+        '#C94F3A', '#1D8A8A', '#B07020', '#5C7AC9', '#8A5C9A',
+        '#3A8A5C', '#C97A2A', '#5A8AC9', '#9A5C3A', '#6A9A5C'
+    ];
+
+    container.innerHTML = '';
+    models.forEach((m, i) => {
+        const share = (m.tokens / maxTokens) * 100;
+        const color = modelColors[i % modelColors.length];
+        const item = document.createElement('div');
+        item.className = 'model-item';
+
+        const row = document.createElement('div');
+        row.className = 'model-row';
+        const nameEl = document.createElement('span');
+        nameEl.className = 'model-name';
+        nameEl.textContent = m.name;
+        const tokEl = document.createElement('span');
+        tokEl.className = 'model-tokens';
+        tokEl.textContent = DashboardUtils.formatTokens(m.tokens);
+        row.append(nameEl, tokEl);
+
+        const barWrap = document.createElement('div');
+        barWrap.className = 'model-share-bar';
+        const fill = document.createElement('div');
+        fill.className = 'model-share-fill';
+        fill.style.cssText = `width:0%;background:${color}`;
+        barWrap.appendChild(fill);
+
+        item.append(row, barWrap);
+        container.appendChild(item);
+        setTimeout(() => { fill.style.width = share + '%'; }, 200 + i * 80);
+    });
+}
+
+// ---- Suggestions ------------------------------------------------------------
+function renderSuggestions(activity, modelUsage) {
+    const container = document.getElementById('suggestions-grid');
+    if (!container) return;
+
+    const totalDays  = activity.length;
+    const totalMessages = activity.reduce((s, d) => s + d.messageCount, 0);
+    const avgPerDay  = totalDays > 0 ? Math.round(totalMessages / totalDays) : 0;
+    const cacheStats = DashboardUtils.calculateCacheStats(modelUsage);
+    const hourlyDetails = [];
+    for (let h = 0; h < 24; h++) {
+        hourlyDetails.push({ hour: h, sessionCount: statsData?.hourCounts?.[h] || 0 });
+    }
+    const pattern = DashboardUtils.identifyActivityPattern(hourlyDetails);
+
+    const suggestions = [
+        {
+            icon: '⚡',
+            title: 'Compact proactively',
+            desc: 'Compact before a thread crosses ~2,000 messages. Mega-threads push cost 2-3x without compaction.',
+            tag: 'high'
+        },
+        {
+            icon: '⏱',
+            title: 'Time-box sessions',
+            desc: 'After ~300 turns, hand off context to a file and start a fresh session to preserve quality.',
+            tag: 'high'
+        },
+        {
+            icon: '🔀',
+            title: 'Delegate more',
+            desc: 'Dispatch investigations to subagents (gsd:execute-phase) instead of running inline in main.',
+            tag: 'medium'
+        },
+        {
+            icon: '💰',
+            title: cacheStats.hitRate < 50 ? 'Improve cache usage' : 'Cache is healthy',
+            desc: cacheStats.hitRate < 50
+                ? `Cache hit rate is ${Math.round(cacheStats.hitRate)}%. Keeping context stable per session improves this significantly.`
+                : `Cache hit rate is ${Math.round(cacheStats.hitRate)}% — solid. Keep context consistent within sessions.`,
+            tag: cacheStats.hitRate < 50 ? 'medium' : 'low'
+        },
+        {
+            icon: '🌙',
+            title: 'Late-night dispatch mode',
+            desc: 'After 21:00 local time, default to dispatch-only: batch tasks to the queue rather than hand-driving.',
+            tag: 'medium'
+        },
+        {
+            icon: '📐',
+            title: 'Fan-out high-stakes work',
+            desc: 'Structure one-offs (CV, investor docs, architecture docs) as researcher → writer → reviewer fan-outs.',
+            tag: 'low'
+        },
+    ];
+
+    container.innerHTML = '';
+    suggestions.forEach(s => {
+        const item = document.createElement('div');
+        item.className = 'suggestion-item';
+
+        const iconEl  = document.createElement('div');
+        iconEl.className = 'suggestion-icon';
+        iconEl.textContent = s.icon;
+
+        const titleEl = document.createElement('div');
+        titleEl.className = 'suggestion-title';
+        titleEl.textContent = s.title;
+
+        const descEl  = document.createElement('div');
+        descEl.className = 'suggestion-desc';
+        descEl.textContent = s.desc;
+
+        const tagEl   = document.createElement('span');
+        tagEl.className = `suggestion-tag ${s.tag}`;
+        tagEl.textContent = s.tag + ' impact';
+
+        item.append(iconEl, titleEl, descEl, tagEl);
+        container.appendChild(item);
+    });
+}
+
+// ---- Insights log -----------------------------------------------------------
+function renderInsights() {
+    const grid  = document.getElementById('insights-grid');
+    const empty = document.getElementById('insights-empty');
+    const count = document.getElementById('insights-count');
+    const trendWrap = document.getElementById('insights-trend-wrap');
+
+    if (!insightsData || insightsData.length === 0) {
+        grid.style.display = 'none';
+        empty.style.display = 'block';
+        count.textContent = '0 entries';
+        return;
+    }
+
+    grid.style.display = 'flex';
+    empty.style.display = 'none';
+    count.textContent = `${insightsData.length} entr${insightsData.length === 1 ? 'y' : 'ies'}`;
+
+    // Trend strip (only meaningful with >1 entry)
+    if (insightsData.length > 1) {
+        trendWrap.style.display = 'block';
+        renderInsightsTrend(insightsData);
+    } else {
+        trendWrap.style.display = 'none';
+    }
+
+    grid.innerHTML = '';
+    insightsData.forEach((entry, idx) => {
+        grid.appendChild(buildInsightCard(entry, idx));
+    });
+}
+
+function buildInsightCard(entry, idx) {
+    const card = document.createElement('div');
+    card.className = 'insight-card reveal';
+    card.style.animationDelay = (idx * 60) + 'ms';
+
+    const m = entry.metrics || {};
+    const weekLabel = entry.weekOf
+        ? 'Week of ' + DashboardUtils.formatDate(entry.weekOf)
+        : 'Weekly Review';
+    const tokensLabel = m.tokens ? DashboardUtils.formatTokens(m.tokens) : '—';
+    const delegPct    = m.delegationRatio != null
+        ? Math.round(m.delegationRatio * 100) + '%'
+        : '—';
+    const peakHour    = m.busiestHour != null ? `${m.busiestHour}:00` : '—';
+
+    const workingItems = (entry.whatsWorking || []).map(w =>
+        `<li>${escapeHtml(w)}</li>`).join('');
+    const frictionItems = (entry.friction || []).map(f =>
+        `<li>${escapeHtml(f)}</li>`).join('');
+    const tipsItems = (entry.tips || []).map(t =>
+        `<li>${escapeHtml(t)}</li>`).join('');
+
+    const notesHtml = entry.notes
+        ? `<div class="insight-notes">${escapeHtml(entry.notes)}</div>`
+        : '';
+
+    const generatedAtHtml = entry.generatedAt
+        ? `<span style="font-family:'IBM Plex Mono',monospace;font-size:.563rem;color:rgba(255,255,255,.25);display:block;margin-top:4px;">Generated ${DashboardUtils.formatDate(entry.generatedAt)}</span>`
+        : '';
+
+    card.innerHTML = `
+        <div class="insight-card-head">
+            <div>
+                <div class="insight-week">${weekLabel}</div>
+                <div class="insight-headline">
+                    ${m.sessions ? DashboardUtils.formatNumber(m.sessions) + ' sessions, ' : ''}
+                    ${m.messages ? DashboardUtils.formatNumber(m.messages) + ' messages' : 'Activity review'}
                 </div>
-            `;
+                ${generatedAtHtml}
+            </div>
+            <div class="insight-kpi-strip">
+                <div class="insight-kpi">
+                    <div class="insight-kpi-val coral">${tokensLabel}</div>
+                    <div class="insight-kpi-lbl">Tokens</div>
+                </div>
+                <div class="insight-kpi">
+                    <div class="insight-kpi-val teal">${delegPct}</div>
+                    <div class="insight-kpi-lbl">Delegation</div>
+                </div>
+                <div class="insight-kpi">
+                    <div class="insight-kpi-val">${peakHour}</div>
+                    <div class="insight-kpi-lbl">Peak hour</div>
+                </div>
+            </div>
+        </div>
+        <div class="insight-body">
+            <div>
+                <div class="insight-section-title working">What's working</div>
+                <ul class="insight-list working">${workingItems}</ul>
+            </div>
+            <div>
+                <div class="insight-section-title friction">Friction</div>
+                <ul class="insight-list friction">${frictionItems}</ul>
+            </div>
+            <div>
+                <div class="insight-section-title tips">Tips</div>
+                <ul class="insight-list tips">${tipsItems}</ul>
+            </div>
+            ${notesHtml}
+        </div>`;
+
+    return card;
+}
+
+function renderInsightsTrend(insights) {
+    const ctx = document.getElementById('insightsTrendChart');
+    if (!ctx) return;
+    if (charts.insightsTrend) charts.insightsTrend.destroy();
+
+    const c = chartColors();
+    // Show oldest to newest (reverse insights since they're newest-first)
+    const ordered = [...insights].reverse();
+    const labels = ordered.map(e => e.weekOf ? e.weekOf.slice(5) : '?');
+    const msgs   = ordered.map(e => e.metrics?.messages || 0);
+    const sesses = ordered.map(e => e.metrics?.sessions || 0);
+
+    charts.insightsTrend = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [
+                {
+                    label: 'Messages',
+                    data: msgs,
+                    borderColor: '#FF8070',
+                    backgroundColor: 'rgba(255,128,112,.15)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    borderWidth: 2,
+                },
+                {
+                    label: 'Sessions',
+                    data: sesses,
+                    borderColor: '#5DDEDE',
+                    backgroundColor: 'transparent',
+                    fill: false,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    borderWidth: 1.5,
+                    yAxisID: 'y2'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: { duration: 800 },
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: { color: c.tick, boxWidth: 10, font: { family: 'IBM Plex Mono', size: 10 } }
+                },
+                tooltip: {
+                    backgroundColor: c.ttBg,
+                    titleColor: '#FFFFFF',
+                    bodyColor: 'rgba(255,255,255,.7)',
+                    borderColor: 'rgba(255,255,255,.08)',
+                    borderWidth: 1,
+                    titleFont: { family: 'IBM Plex Mono', size: 11 },
+                    bodyFont:  { family: 'IBM Plex Mono', size: 11 }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { color: c.grid },
+                    ticks: { color: c.tick, font: { family: 'IBM Plex Mono', size: 10 } }
+                },
+                y: {
+                    grid: { color: c.grid },
+                    ticks: { color: c.tick, font: { family: 'IBM Plex Mono', size: 10 } }
+                },
+                y2: {
+                    position: 'right',
+                    grid: { display: false },
+                    ticks: { color: c.tick, font: { family: 'IBM Plex Mono', size: 10 } }
+                }
+            }
         }
+    });
+}
 
-        function renderSuggestions() {
-            if (!statsData || !statsData.dailyActivity) return;
+// ---- Glossary toggle --------------------------------------------------------
+function setupGlossaryToggle() {
+    const btn     = document.getElementById('glossary-btn');
+    const content = document.getElementById('glossary-content');
+    if (!btn || !content) return;
 
-            const suggestions = generateSuggestions(statsData);
-            const grid = document.getElementById('suggestionsGrid');
-            grid.innerHTML = '';
+    btn.addEventListener('click', () => {
+        const expanded = btn.getAttribute('aria-expanded') === 'true';
+        btn.setAttribute('aria-expanded', !expanded);
+        content.classList.toggle('collapsed', expanded);
+        content.classList.toggle('expanded',  !expanded);
+        btn.querySelector('span:first-child').textContent = expanded ? 'Show' : 'Hide';
+        btn.querySelector('span:last-child').textContent  = expanded ? '▼' : '▲';
+    });
+}
 
-            suggestions.forEach((suggestion, index) => {
-                const card = document.createElement('div');
-                card.className = 'suggestion-card';
-                card.style.position = 'relative';
-                card.style.animationDelay = `${index * 0.1}s`;
-                card.innerHTML = `
-                    <span class="suggestion-type">${suggestion.type}</span>
-                    <div class="suggestion-icon">${suggestion.icon}</div>
-                    <div class="suggestion-title">${suggestion.title}</div>
-                    <div class="suggestion-desc">${suggestion.description}</div>
-                    <span class="suggestion-impact ${suggestion.impact}">${suggestion.impact} impact</span>
-                `;
-                grid.appendChild(card);
+// ---- Scroll reveal ----------------------------------------------------------
+function setupScrollReveal() {
+    const targets = document.querySelectorAll('.reveal');
+    if ('IntersectionObserver' in window) {
+        const obs = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    e.target.classList.add('visible');
+                    obs.unobserve(e.target);
+                }
             });
-        }
+        }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+        targets.forEach(t => obs.observe(t));
+    } else {
+        targets.forEach(t => t.classList.add('visible'));
+    }
+}
 
-        function generateSuggestions(data) {
-            const suggestions = [];
-            const activity = data.dailyActivity || [];
-            const modelUsage = data.modelUsage || {};
-
-            // Calculate key metrics
-            const totalMessages = activity.reduce((sum, day) => sum + day.messageCount, 0);
-            const totalSessions = activity.reduce((sum, day) => sum + day.sessionCount, 0);
-            const totalToolCalls = activity.reduce((sum, day) => sum + day.toolCallCount, 0);
-            const avgPerSession = totalSessions > 0 ? Math.round(totalMessages / totalSessions) : 0;
-            const streak = DashboardUtils.calculateStreak(activity);
-            const cacheStats = DashboardUtils.calculateCacheStats(modelUsage);
-
-            // Day of week analysis
-            const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-            const dayActivity = {};
-            activity.forEach(d => {
-                const dayName = dayNames[new Date(d.date).getDay()];
-                dayActivity[dayName] = (dayActivity[dayName] || 0) + d.messageCount;
-            });
-            const mostActiveDay = Object.entries(dayActivity).sort((a, b) => b[1] - a[1])[0];
-
-            // Tool usage ratio
-            const toolRatio = totalMessages > 0 ? (totalToolCalls / totalMessages) : 0;
-
-            // Model diversity
-            const modelCount = Object.keys(modelUsage).length;
-
-            // === SUGGESTION: Cache Optimization ===
-            if (cacheStats.hitRate < 50) {
-                suggestions.push({
-                    icon: '💾',
-                    title: 'Boost Your Cache Hit Rate',
-                    description: `Your cache hit rate is ${cacheStats.hitRate.toFixed(1)}%. Reuse context across sessions by working in focused conversations. This can save up to 90% on costs for repeated exchanges.`,
-                    type: 'Cost',
-                    impact: 'high'
-                });
-            } else if (cacheStats.hitRate >= 70) {
-                suggestions.push({
-                    icon: '✨',
-                    title: 'Excellent Cache Efficiency!',
-                    description: `Your ${cacheStats.hitRate.toFixed(1)}% cache hit rate shows you're efficiently reusing context. Keep maintaining conversations and using project-specific contexts to maximize savings.`,
-                    type: 'Achievement',
-                    impact: 'low'
-                });
-            }
-
-            // === SUGGESTION: Productivity Pattern ===
-            if (mostActiveDay) {
-                suggestions.push({
-                    icon: '📅',
-                    title: `Schedule Deep Work on ${mostActiveDay[0]}s`,
-                    description: `You're most active on ${mostActiveDay[0]}s with ${DashboardUtils.formatNumber(mostActiveDay[1])} messages. Plan your most challenging coding tasks for this day to align with your peak productivity.`,
-                    type: 'Productivity',
-                    impact: 'medium'
-                });
-            }
-
-            // === SUGGESTION: Tool Usage ===
-            if (toolRatio < 0.5) {
-                suggestions.push({
-                    icon: '🔧',
-                    title: 'Leverage More Tools',
-                    description: `You're using tools in ${Math.round(toolRatio * 100)}% of exchanges. Try using file operations, web search, and bash commands more to let Claude do the heavy lifting.`,
-                    type: 'Workflow',
-                    impact: 'medium'
-                });
-            } else if (toolRatio > 1.5) {
-                suggestions.push({
-                    icon: '⚡',
-                    title: 'Power Tool User!',
-                    description: `You average ${Math.round(toolRatio * 10) / 10} tool calls per message - you're maximizing Claude's capabilities. Consider creating custom tool workflows for repetitive tasks.`,
-                    type: 'Achievement',
-                    impact: 'low'
-                });
-            }
-
-            // === SUGGESTION: Streak ===
-            if (streak >= 30) {
-                suggestions.push({
-                    icon: '🔥',
-                    title: `${streak}-Day Streak!`,
-                    description: `Incredible consistency! You've used Claude Code every day for ${streak} days. This regular habit helps maintain context and improves the quality of assistance.`,
-                    type: 'Achievement',
-                    impact: 'low'
-                });
-            } else if (streak >= 7) {
-                suggestions.push({
-                    icon: '📈',
-                    title: 'Building Momentum',
-                    description: `${streak} days in a row! You're developing a consistent coding habit. Try to maintain at least one session per day to keep momentum going.`,
-                    type: 'Productivity',
-                    impact: 'medium'
-                });
-            } else if (streak === 0) {
-                suggestions.push({
-                    icon: '🎯',
-                    title: 'Start a New Streak',
-                    description: 'Daily usage helps maintain context and improves response quality. Try to have at least one brief coding session each day.',
-                    type: 'Productivity',
-                    impact: 'low'
-                });
-            }
-
-            // === SUGGESTION: Session Length ===
-            if (avgPerSession > 100) {
-                suggestions.push({
-                    icon: '📊',
-                    title: 'Break Up Long Sessions',
-                    description: `Your sessions average ${avgPerSession} messages. Consider breaking complex tasks into multiple focused sessions to improve context retention and token efficiency.`,
-                    type: 'Workflow',
-                    impact: 'medium'
-                });
-            } else if (avgPerSession < 10) {
-                suggestions.push({
-                    icon: '💡',
-                    title: 'Deeper Conversations',
-                    description: `Your sessions average ${avgPerSession} messages. Try exploring topics more deeply before moving on - richer conversations lead to better solutions and learning.`,
-                    type: 'Learning',
-                    impact: 'low'
-                });
-            }
-
-            // === SUGGESTION: Model Strategy ===
-            const haikuUsage = modelUsage['claude-haiku-4-5-20251001'];
-            const sonnetUsage = modelUsage['claude-sonnet-4-5-20250929'];
-            const opusUsage = modelUsage['claude-opus-4-5-20251101'];
-
-            const haikuTokens = haikuUsage ? (haikuUsage.inputTokens || 0) + (haikuUsage.outputTokens || 0) : 0;
-            const sonnetTokens = sonnetUsage ? (sonnetUsage.inputTokens || 0) + (sonnetUsage.outputTokens || 0) : 0;
-            const opusTokens = opusUsage ? (opusUsage.inputTokens || 0) + (opusUsage.outputTokens || 0) : 0;
-
-            if (opusTokens > sonnetTokens * 2 && haikuTokens < opusTokens * 0.1) {
-                suggestions.push({
-                    icon: '💰',
-                    title: 'Consider Haiku for Quick Tasks',
-                    description: `You're heavily using Opus. For quick queries, simple edits, and documentation tasks, try Haiku - it's ~20x faster and ~95% cheaper.`,
-                    type: 'Cost',
-                    impact: 'high'
-                });
-            }
-
-            // === SUGGESTION: Activity Pattern ===
-            const recentActivity = activity.slice(-7);
-            const avgRecentMessages = recentActivity.reduce((sum, d) => sum + d.messageCount, 0) / Math.max(recentActivity.length, 1);
-            const totalDays = activity.length;
-            const allTimeAvg = totalMessages / Math.max(totalDays, 1);
-
-            if (avgRecentMessages > allTimeAvg * 1.5) {
-                suggestions.push({
-                    icon: '🚀',
-                    title: 'Productivity Spike!',
-                    description: `Your recent activity is ${Math.round((avgRecentMessages / allTimeAvg - 1) * 100)}% above your average. You're in a productive groove - consider tackling your most challenging projects now.`,
-                    type: 'Productivity',
-                    impact: 'medium'
-                });
-            } else if (avgRecentMessages < allTimeAvg * 0.5 && totalDays > 7) {
-                suggestions.push({
-                    icon: '🌱',
-                    title: 'Rebuild Your Momentum',
-                    description: `Your recent activity is below your usual pace. Consider setting a small daily goal or revisiting an interesting project to get back into your rhythm.`,
-                    type: 'Productivity',
-                    impact: 'low'
-                });
-            }
-
-            // === SUGGESTION: Project Diversity ===
-            if (modelCount >= 4) {
-                suggestions.push({
-                    icon: '🎨',
-                    title: 'Model Explorer',
-                    description: `You've used ${modelCount} different models. Each has strengths - Haiku for speed, Sonnet for balance, Opus for complexity. Keep experimenting to find the right tool for each task.`,
-                    type: 'Strategy',
-                    impact: 'medium'
-                });
-            }
-
-            // Ensure we have at least 3 suggestions
-            if (suggestions.length < 3) {
-                suggestions.push({
-                    icon: '📚',
-                    title: 'Explore New Features',
-                    description: 'Claude Code is regularly updated with new capabilities. Try using voice mode, MCP servers, or custom prompts to enhance your workflow.',
-                    type: 'Learning',
-                    impact: 'low'
-                });
-            }
-
-            // Return top 6 suggestions, prioritizing by impact
-            const impactOrder = { high: 0, medium: 1, low: 2 };
-            return suggestions
-                .sort((a, b) => impactOrder[a.impact] - impactOrder[b.impact])
-                .slice(0, 6);
-        }
-
-        function closeModal() {
-            DashboardUtils.closeModal();
-        }
-
-        function showModal(title, content) {
-            DashboardUtils.showModal(title, content);
-        }
-    </script>
+// ---- Utils ------------------------------------------------------------------
+function escapeHtml(str) {
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+</script>
 </body>
 </html>
