@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "lastComputedDate": "2026-07-09",
+  "lastComputedDate": "2026-07-15",
   "dailyActivity": [
     {
       "date": "2025-12-24",
@@ -968,10 +968,10 @@
     },
     {
       "date": "2026-06-13",
-      "messageCount": 2027,
-      "sessionCount": 75,
-      "toolCallCount": 383,
-      "totalTokens": 234300957
+      "messageCount": 2978,
+      "sessionCount": 76,
+      "toolCallCount": 577,
+      "totalTokens": 377222772
     },
     {
       "date": "2026-06-14",
@@ -1010,10 +1010,10 @@
     },
     {
       "date": "2026-06-19",
-      "messageCount": 845,
-      "sessionCount": 79,
-      "toolCallCount": 112,
-      "totalTokens": 64047083
+      "messageCount": 899,
+      "sessionCount": 80,
+      "toolCallCount": 122,
+      "totalTokens": 66805760
     },
     {
       "date": "2026-06-20",
@@ -1031,10 +1031,10 @@
     },
     {
       "date": "2026-06-22",
-      "messageCount": 2152,
-      "sessionCount": 7,
-      "toolCallCount": 371,
-      "totalTokens": 292305499
+      "messageCount": 2160,
+      "sessionCount": 8,
+      "toolCallCount": 372,
+      "totalTokens": 292646446
     },
     {
       "date": "2026-06-23",
@@ -1101,17 +1101,17 @@
     },
     {
       "date": "2026-07-02",
-      "messageCount": 6814,
-      "sessionCount": 49,
-      "toolCallCount": 1882,
-      "totalTokens": 611413750
+      "messageCount": 7481,
+      "sessionCount": 51,
+      "toolCallCount": 2029,
+      "totalTokens": 680112273
     },
     {
       "date": "2026-07-03",
-      "messageCount": 9742,
-      "sessionCount": 74,
-      "toolCallCount": 3077,
-      "totalTokens": 831588688
+      "messageCount": 11339,
+      "sessionCount": 79,
+      "toolCallCount": 3414,
+      "totalTokens": 1052356630
     },
     {
       "date": "2026-07-04",
@@ -1136,24 +1136,66 @@
     },
     {
       "date": "2026-07-07",
-      "messageCount": 3743,
-      "sessionCount": 21,
-      "toolCallCount": 897,
-      "totalTokens": 527631003
+      "messageCount": 5758,
+      "sessionCount": 24,
+      "toolCallCount": 1328,
+      "totalTokens": 866561752
     },
     {
       "date": "2026-07-08",
-      "messageCount": 5348,
-      "sessionCount": 27,
-      "toolCallCount": 1180,
-      "totalTokens": 805847260
+      "messageCount": 8890,
+      "sessionCount": 31,
+      "toolCallCount": 1909,
+      "totalTokens": 1460550380
     },
     {
       "date": "2026-07-09",
-      "messageCount": 1062,
-      "sessionCount": 24,
-      "toolCallCount": 274,
-      "totalTokens": 114400318
+      "messageCount": 5653,
+      "sessionCount": 41,
+      "toolCallCount": 1443,
+      "totalTokens": 1199561443
+    },
+    {
+      "date": "2026-07-10",
+      "messageCount": 276,
+      "sessionCount": 11,
+      "toolCallCount": 71,
+      "totalTokens": 17794973
+    },
+    {
+      "date": "2026-07-11",
+      "messageCount": 391,
+      "sessionCount": 17,
+      "toolCallCount": 86,
+      "totalTokens": 22705093
+    },
+    {
+      "date": "2026-07-12",
+      "messageCount": 301,
+      "sessionCount": 7,
+      "toolCallCount": 78,
+      "totalTokens": 25519172
+    },
+    {
+      "date": "2026-07-13",
+      "messageCount": 802,
+      "sessionCount": 16,
+      "toolCallCount": 171,
+      "totalTokens": 74890880
+    },
+    {
+      "date": "2026-07-14",
+      "messageCount": 842,
+      "sessionCount": 56,
+      "toolCallCount": 169,
+      "totalTokens": 48500940
+    },
+    {
+      "date": "2026-07-15",
+      "messageCount": 65,
+      "sessionCount": 7,
+      "toolCallCount": 13,
+      "totalTokens": 3180448
     }
   ],
   "dailyModelTokens": [
@@ -2049,14 +2091,14 @@
       "maxOutputTokens": 0
     }
   },
-  "totalSessions": 8381,
-  "totalMessages": 516151,
+  "totalSessions": 8529,
+  "totalMessages": 532253,
   "byAccount": {
     "personal": {
-      "totalSessions": 6096,
-      "totalMessages": 352458,
-      "totalTokens": 30805927053,
-      "totalToolCalls": 107218
+      "totalSessions": 6244,
+      "totalMessages": 368560,
+      "totalTokens": 33512801457,
+      "totalToolCalls": 110824
     },
     "fho": {
       "totalSessions": 440,
@@ -2073,30 +2115,30 @@
   },
   "firstSessionDate": "2025-12-24T04:45:19.458Z",
   "hourCounts": {
-    "0": 218,
-    "1": 99,
+    "0": 219,
+    "1": 102,
     "2": 67,
     "3": 58,
     "4": 19,
     "5": 20,
-    "6": 69,
+    "6": 76,
     "7": 186,
-    "8": 653,
-    "9": 842,
-    "10": 871,
-    "11": 801,
-    "12": 708,
-    "13": 715,
-    "14": 824,
-    "15": 900,
-    "16": 727,
-    "17": 792,
-    "18": 706,
-    "19": 610,
-    "20": 767,
-    "21": 1074,
-    "22": 780,
-    "23": 563
+    "8": 672,
+    "9": 845,
+    "10": 883,
+    "11": 806,
+    "12": 716,
+    "13": 720,
+    "14": 834,
+    "15": 903,
+    "16": 731,
+    "17": 804,
+    "18": 720,
+    "19": 611,
+    "20": 773,
+    "21": 1098,
+    "22": 785,
+    "23": 569
   },
   "totalSpeculationTimeSavedMs": 0
 }

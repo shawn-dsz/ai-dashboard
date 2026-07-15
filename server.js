@@ -766,16 +766,17 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // Unified AI usage (Claude / Grok / OpenAI / Kimi / GLM) via Python collectors
+  // Unified AI usage (Claude / Grok / OpenAI / Kimi / GLM) via Python collectors in-repo
   if (req.url && req.url.startsWith('/api/ai-usage') && req.method === 'GET') {
     const u = new URL(req.url, 'http://localhost');
     const days = u.searchParams.get('days') || '30';
     const py = process.env.AI_USAGE_PYTHON || 'python3';
-    const script = path.join(process.env.HOME || '', 'proj/ai-usage/app.py');
+    const collectorsDir = path.join(ROOT, 'lib', 'ai-usage');
+    const script = path.join(collectorsDir, 'app.py');
     const env = {
       ...process.env,
       PYTHONPATH: [
-        path.join(process.env.HOME || '', 'proj/ai-usage'),
+        collectorsDir,
         path.join(process.env.HOME || '', 'proj/grok-usage'),
         process.env.PYTHONPATH || '',
       ].filter(Boolean).join(path.delimiter),

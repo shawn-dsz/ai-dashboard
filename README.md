@@ -15,7 +15,7 @@ Light theme by default; toggle to dark. Not vendor invoices.
 ## Quick start
 
 ```bash
-cd ~/proj/claude-code-dashboard   # project folder (repo may still be named claude-code-dashboard on GitHub)
+cd ~/proj/ai-dashboard
 ./serve.sh                        # default port 8081
 # open http://localhost:8081/
 ```
@@ -26,10 +26,10 @@ API:
 curl -s 'http://localhost:8081/api/ai-usage?days=30' | head
 ```
 
-Collectors live in `~/proj/ai-usage` (Python). The Node server shells out to:
+Collectors live in `lib/ai-usage/` (Python). The Node server shells out to:
 
 ```bash
-PYTHONPATH=~/proj/ai-usage:~/proj/grok-usage python3 ~/proj/ai-usage/app.py scan --days 30
+PYTHONPATH=lib/ai-usage:~/proj/grok-usage python3 lib/ai-usage/app.py scan --days 30
 ```
 
 ## Pages
@@ -62,6 +62,5 @@ PYTHONPATH=~/proj/ai-usage:~/proj/grok-usage python3 ~/proj/ai-usage/app.py scan
 
 ## Related projects
 
-- `~/proj/ai-usage` — collectors + lightweight Python server (`:8790`)
-- `~/proj/grok-usage` — Grok-only scanner
-- `~/proj/kimi-dashboard` — Kimi HTML generators
+- `~/proj/grok-usage` — Grok session scanner (imported by collectors)
+- `~/proj/kimi-dashboard` — Kimi stats refresh scripts
