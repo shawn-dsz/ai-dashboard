@@ -199,7 +199,7 @@
         <button type="button" class="chip" data-days="90">90d</button>
         <button type="button" class="chip" data-days="0">All</button>
         <button type="button" id="themeBtn" title="Toggle theme">Dark</button>
-        <a href="/claude-activity.html">Claude activity</a>
+        <a href="/claude-activity.html" title="Full Claude insights: heatmap, models, cache, streaks">Claude insights</a>
         <a href="/api/ai-usage?days=30" id="jsonLink">JSON</a>
         <button type="button" id="refreshBtn">Refresh</button>
       </div>
@@ -218,7 +218,8 @@
     <div class="footer">
       <strong>data</strong> = local source found (not a continuous monitor). Page can auto-refresh; OpenAI scan caches ~5 min.<br/>
       <strong>Tokens:</strong> Claude/Kimi/GLM = model tokens · OpenAI = Codex <code>total_token_usage</code> · Grok = peak context intensity (not an xAI bill).<br/>
-      Legacy Claude “year in review” UI: <a href="/claude-activity.html">claude-activity.html</a>
+      <strong>Claude insights</strong> (heatmap, streaks, model costs, cache — the original dashboard):
+      <a href="/claude-activity.html">Open Claude Activity</a>
     </div>
   </div>
 
