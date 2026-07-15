@@ -1,6 +1,10 @@
 # AI Dashboard
 
-Local multi-provider **token usage** dashboard for Shawn’s machine.
+Local multi-provider **token usage** dashboard for Claude, Grok, OpenAI/Codex, Kimi, and GLM.
+
+<p align="center">
+  <img src="docs/ai-dashboard-preview.png" alt="AI Dashboard — Claude tab with token charts" width="100%" />
+</p>
 
 | Tab | Source | Metric |
 |-----|--------|--------|
