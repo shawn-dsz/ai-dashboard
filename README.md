@@ -1,188 +1,67 @@
-# Claude Code Usage Dashboard
+# AI Dashboard
 
-A personal analytics dashboard that visualizes usage patterns for [Claude Code](https://claude.ai/code) - Anthropic's CLI tool. Similar to GitHub's "Year in Review" or Spotify Wrapped, it provides insights into your coding sessions, token usage, and costs.
+Local multi-provider **token usage** dashboard for Shawn’s machine.
 
-## Quick Start
+| Tab | Source | Metric |
+|-----|--------|--------|
+| **Claude** | Claude Code `data.json` / `~/.claude/stats-cache.json` | Real model tokens (in/out/cache) |
+| **Grok** | `~/.grok/sessions` via `~/proj/grok-usage` | Peak context intensity + model id |
+| **OpenAI** | Codex rollout JSONL under `~/.codex` | Real `total_token_usage` |
+| **Kimi** | `kimi-dashboard/kimi_stats.json` or `~/.kimi/kimi-stats.py` | Session tokens |
+| **GLM** | Claude Code modelUsage keys matching `glm*` | Real tokens (routed via Claude Code) |
 
-### Prerequisites
+Light theme by default; toggle to dark. Not vendor invoices.
 
-- [Claude Code CLI](https://claude.ai/code) installed and configured
-- [Node.js](https://nodejs.org/) (for session caching)
-
-### Update the data
-
-Run the update script:
+## Quick start
 
 ```bash
-cd /path/to/claude-code-dashboard
+cd ~/proj/claude-code-dashboard   # project folder (repo may still be named claude-code-dashboard on GitHub)
+./serve.sh                        # default port 8081
+# open http://localhost:8081/
+```
+
+API:
+
+```bash
+curl -s 'http://localhost:8081/api/ai-usage?days=30' | head
+```
+
+Collectors live in `~/proj/ai-usage` (Python). The Node server shells out to:
+
+```bash
+PYTHONPATH=~/proj/ai-usage:~/proj/grok-usage python3 ~/proj/ai-usage/app.py scan --days 30
+```
+
+## Pages
+
+| URL | What |
+|-----|------|
+| `/` or `/index.html` | **AI Dashboard** (5 tabs + charts) |
+| `/claude-activity.html` | Legacy Claude “year in review” UI |
+| `/home.html` | Agents home (peers) |
+
+## Update Claude aggregates
+
+```bash
 ./update.sh
+# or
+./aggregate-data.sh && node rebuild-stats.js
 ```
 
-Or manually copy the stats (from the dashboard directory):
+## Kimi stats
 
 ```bash
-cp ~/.claude/stats-cache.json data.json
+~/proj/kimi-dashboard/update-dashboard.sh
+# writes kimi_stats.json used by the Kimi tab
 ```
 
-### View the dashboard
+## Theme
 
-Open `index.html` in your browser:
+- Default: **light**
+- Button **Dark** / **Light** persists in `localStorage` (`ai-dashboard-theme`)
 
-```bash
-open index.html
-```
+## Related projects
 
-Or start the local server:
-
-```bash
-./serve.sh
-```
-
-The dashboard will open at `http://localhost:8000`
-
-## Features
-
-- **Activity Heatmap** - GitHub-style 52-week visualization of your coding activity
-- **6 Key Metrics** - Total messages, sessions, tool calls, averages, most active day, and current streak
-- **Model Usage** - Breakdown of models used with token counts and costs
-- **Cache Metrics** - Cache hit rate and efficiency tracking with progress bars
-- **Interactive Charts** - Daily activity timeline, weekly patterns, distribution charts
-- **Theme Toggle** - Switch between dark and light themes with the 🌙/☀️ button
-- **Glossary** - Built-in definitions for all metrics and terms
-
-## Setting Up With Your Own Stats
-
-This dashboard works with **your own Claude Code stats** automatically. The scripts read from your `~/.claude/` directory - **no code changes needed**.
-
-### Where Your Data Comes From
-
-When you use Claude Code CLI, it stores session data here:
-
-```
-~/.claude/
-├── projects/
-│   ├── project-1/
-│   │   └── session.jsonl      # Your session history
-│   └── project-2/
-│       └── session.jsonl
-└── stats-cache.json            # Aggregated statistics
-```
-
-The dashboard scripts automatically:
-1. Read your session files from `~/.claude/projects/`
-2. Build a fast SQLite cache in `.cache/sessions.db`
-3. Generate `projects.json` and `sessions.json` for the dashboard
-
-### One-Time Setup
-
-```bash
-# 1. Clone or download this repository
-git clone <repository-url>
-cd claude-code-dashboard
-
-# 2. Install dependencies (for session cache builder)
-npm install
-
-# 3. Update your data
-./update.sh
-
-# 4. Start the dashboard
-./serve.sh
-```
-
-That's it! The dashboard will open at `http://localhost:8000` with **your own stats**.
-
-### Updating Your Data
-
-Whenever you want to see updated stats:
-
-1. Run the update script: `./update.sh`
-2. Refresh the dashboard in your browser
-
-The script copies your latest Claude Code stats from `~/.claude/stats-cache.json` to `data.json`.
-
-## Key Links
-
-| Resource | Link |
-|----------|------|
-| Claude Code Documentation | [docs.claude.ai/code](https://docs.claude.ai/code) |
-| Claude Code CLI | [claude.ai/code](https://claude.ai/code) |
-| Anthropic API Pricing | [anthropic.com/pricing](https://www.anthropic.com/pricing) |
-| Model Documentation | [docs.anthropic.com](https://docs.anthropic.com) |
-
-## Data Sources
-
-| File | Description |
-|------|-------------|
-| `data.json` | Symlink to `~/.claude/stats-cache.json` (generated by Claude Code) |
-| `projects.json` | Project-level session counts (from cache) |
-| `sessions.json` | Recent session history (from cache) |
-| `.cache/sessions.db` | SQLite session cache for fast incremental updates |
-
-## Session Cache
-
-The dashboard uses a SQLite-based session cache for fast incremental updates:
-
-- **Initial build**: ~2 seconds for ~1,400 session files
-- **Incremental updates**: ~0.1 seconds (only processes new/modified files)
-- **Cache location**: `.cache/sessions.db`
-
-To rebuild the cache from scratch:
-
-```bash
-rm .cache/sessions.db
-./serve.sh
-```
-
-## Technologies
-
-- **HTML5** - Single-page application structure
-- **CSS3** - Custom styles with CSS variables for theming
-- **Vanilla JavaScript (ES6+)** - No frameworks, pure JavaScript
-- **sql.js** - Pure JavaScript SQLite for session caching
-- **Python** - Local development server via `http.server`
-
-## Dashboard Metrics
-
-### Session
-A coding session represents one interaction with Claude Code, from when you start until you close or switch contexts. Includes all messages and tool calls.
-
-### Message
-Each message is an exchange between you and Claude - your prompts, questions, or commands and Claude's responses.
-
-### Tokens
-Tokens are the basic unit of text processing. Roughly, 1 token ≈ 4 characters. Used for billing and model context limits.
-
-### Cache Read/Write
-- **Cache Read**: When Claude reuses previously processed context. Costs ~90% less.
-- **Cache Write**: When new context is stored for reuse. Slightly more expensive upfront but saves money on repeated exchanges.
-
-### Streak
-Consecutive days where you had at least one session. Shows consistency in your coding workflow.
-
-## Project Structure
-
-```
-claude-code-dashboard/
-├── index.html              # Main dashboard (single-file app)
-├── dashboard-common.js     # Shared utilities and formatters
-├── build-session-cache.js  # Session cache builder
-├── aggregate-data.sh       # Data aggregation script
-├── serve.sh                # Start local server
-├── update.sh               # Update stats from Claude Code
-├── package.json            # Node.js dependencies
-└── .cache/                 # Session cache database (gitignored)
-```
-
-## Updating Your Data
-
-Whenever you want to see updated stats:
-
-1. Run the update script: `./update.sh`
-2. Refresh the dashboard in your browser
-
-The script copies your latest Claude Code stats from `~/.claude/stats-cache.json` to `data.json`.
-
-## License
-
-MIT
+- `~/proj/ai-usage` — collectors + lightweight Python server (`:8790`)
+- `~/proj/grok-usage` — Grok-only scanner
+- `~/proj/kimi-dashboard` — Kimi HTML generators

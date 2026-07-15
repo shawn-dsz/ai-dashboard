@@ -410,7 +410,7 @@ const MIME_TYPES = {
 };
 
 function serveStatic(req, res) {
-  let filePath = path.join(ROOT, req.url === '/' ? '/home.html' : req.url);
+  let filePath = path.join(ROOT, req.url === '/' ? '/index.html' : req.url);
   // Strip query params
   filePath = filePath.split('?')[0];
 
@@ -766,6 +766,48 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // Unified AI usage (Claude / Grok / OpenAI / Kimi / GLM) via Python collectors
+  if (req.url && req.url.startsWith('/api/ai-usage') && req.method === 'GET') {
+    const u = new URL(req.url, 'http://localhost');
+    const days = u.searchParams.get('days') || '30';
+    const py = process.env.AI_USAGE_PYTHON || 'python3';
+    const script = path.join(process.env.HOME || '', 'proj/ai-usage/app.py');
+    const env = {
+      ...process.env,
+      PYTHONPATH: [
+        path.join(process.env.HOME || '', 'proj/ai-usage'),
+        path.join(process.env.HOME || '', 'proj/grok-usage'),
+        process.env.PYTHONPATH || '',
+      ].filter(Boolean).join(path.delimiter),
+    };
+    execFile(
+      py,
+      [script, 'scan', '--days', String(days)],
+      { env, timeout: 120000, maxBuffer: 20 * 1024 * 1024 },
+      (err, stdout, stderr) => {
+        if (err) {
+          res.writeHead(500, {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+          });
+          res.end(JSON.stringify({
+            error: 'ai-usage scan failed',
+            detail: err.message,
+            stderr: (stderr || '').slice(0, 800),
+          }));
+          return;
+        }
+        res.writeHead(200, {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'no-store',
+        });
+        res.end(stdout);
+      },
+    );
+    return;
+  }
+
   if (req.url === '/api/health' && req.method === 'GET') {
     const options = {
       hostname: BROKER_HOST,
@@ -797,8 +839,10 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`Dashboard server listening on http://localhost:${PORT}`);
+  console.log(`AI Dashboard listening on http://localhost:${PORT}`);
+  console.log(`  AI usage (tabs):  http://localhost:${PORT}/index.html`);
+  console.log(`  Claude activity:  http://localhost:${PORT}/claude-activity.html`);
   console.log(`  Agents (home):    http://claude-agents:${PORT}/`);
-  console.log(`  Activity stats:   http://claude-dashboard:${PORT}/index.html`);
-  console.log(`  API proxy:        /api/peers -> broker:${BROKER_PORT}`);
+  console.log(`  API:              /api/ai-usage?days=30`);
+  console.log(`  Peers proxy:      /api/peers -> broker:${BROKER_PORT}`);
 });

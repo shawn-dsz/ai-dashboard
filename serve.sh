@@ -3,11 +3,11 @@
 # Usage: ./serve.sh [port]
 
 PORT="${1:-8081}"
-HOST="claude-dashboard"
-URL="http://${HOST}:${PORT}"
+HOST="ai-dashboard"
+URL="http://localhost:${PORT}"
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-echo "🚀 Starting Claude Code Dashboard..."
+echo "Starting AI Dashboard..."
 echo ""
 
 # Build session cache and aggregate data
@@ -24,36 +24,28 @@ if [ -f "$DIR/rebuild-stats.js" ]; then
     echo ""
 fi
 
-# Ensure hosts entries exist
-for h in "$HOST" "claude-agents"; do
+# Optional hosts entries (legacy names still fine)
+for h in "ai-dashboard" "claude-dashboard" "claude-agents"; do
     if ! grep -q "$h" /etc/hosts 2>/dev/null; then
-        echo "⚠️  No /etc/hosts entry for $h."
-        echo "   Run: sudo sh -c 'echo \"127.0.0.1 $h\" >> /etc/hosts'"
-        echo ""
+        echo "Note: no /etc/hosts entry for $h (optional)."
+        echo "  sudo sh -c 'echo \"127.0.0.1 $h\" >> /etc/hosts'"
     fi
 done
 
-echo "📁 Directory: $DIR"
-echo "🌐 Activity:  http://${HOST}:${PORT}/index.html"
-echo "🖥️  Agents:    http://claude-agents:${PORT}/"
-echo ""
-echo "Theme toggle is available in the app (🌙/☀️ button)"
+echo "Directory: $DIR"
+echo "AI usage:  http://localhost:${PORT}/"
+echo "Claude UI: http://localhost:${PORT}/claude-activity.html"
+echo "Agents:    http://localhost:${PORT}/home.html"
 echo ""
 echo "Press Ctrl+C to stop the server"
 echo ""
 
-# Change to the project directory
 cd "$DIR"
 
-# Start the Node server (static files + API proxy to claude-peers broker)
 node "$DIR/server.js" "$PORT" &
 SERVER_PID=$!
 
-# Wait a moment for server to start
 sleep 0.5
+open "http://localhost:${PORT}/" 2>/dev/null || true
 
-# Open browser to agents homepage
-open "http://claude-agents:${PORT}/"
-
-# Wait for the server process
 wait $SERVER_PID

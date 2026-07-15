@@ -1,9 +1,10 @@
 {
-  "name": "claude-code-dashboard",
-  "version": "1.0.0",
-  "description": "Claude Code usage analytics dashboard with session caching",
-  "main": "build-session-cache.js",
+  "name": "ai-dashboard",
+  "version": "2.0.0",
+  "description": "AI usage dashboard — Claude, Grok, OpenAI/Codex, Kimi, GLM from local session stats",
+  "main": "server.js",
   "scripts": {
+    "start": "node server.js 8081",
     "build-cache": "node build-session-cache.js .cache/sessions.db",
     "test": "npx vitest run",
     "test:watch": "npx vitest"
