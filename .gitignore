@@ -24,3 +24,7 @@ data.json
 # Verification screenshots (generated during testing)
 screenshot-*.png
 screenshot-*.jpg
+
+__pycache__/
+*.pyc
+
