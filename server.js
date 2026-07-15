@@ -410,9 +410,14 @@ const MIME_TYPES = {
 };
 
 function serveStatic(req, res) {
-  let filePath = path.join(ROOT, req.url === '/' ? '/index.html' : req.url);
-  // Strip query params
-  filePath = filePath.split('?')[0];
+  // Strip query string first — "/?tab=grok" must not become a filesystem path
+  let urlPath = (req.url || '/').split('?')[0].split('#')[0] || '/';
+  if (urlPath === '/' || urlPath === '') {
+    urlPath = '/index.html';
+  }
+  // Prevent path traversal
+  const safe = path.normalize(urlPath).replace(/^(\.\.[/\\])+/, '');
+  const filePath = path.join(ROOT, safe);
 
   const ext = path.extname(filePath);
   const mime = MIME_TYPES[ext] || 'application/octet-stream';
