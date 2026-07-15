@@ -43,21 +43,22 @@
       --blue: #2B6CB0;
       --purple: #6B46C1;
       --green: #2F855A;
-      --sh: 0 1px 4px rgba(0,0,0,.06), 0 2px 6px rgba(0,0,0,.04);
+      --sh: 0 1px 3px rgba(15,15,15,.06);
       --r: 10px;
       --mono: 'IBM Plex Mono', ui-monospace, monospace;
       --sans: "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
+      --accent: var(--purple);
     }
     [data-theme="dark"] {
-      --bg: #0F1115;
-      --bg-card: #171A21;
-      --bg-raised: #1C2028;
-      --bg-inset: #12151A;
-      --ink: #F2F2F0;
-      --ink-2: #B0B0A8;
-      --ink-3: #787870;
-      --line: #2A2F3A;
-      --sh: 0 1px 4px rgba(0,0,0,.35);
+      --bg: #12141A;
+      --bg-card: #1A1D26;
+      --bg-raised: #222632;
+      --bg-inset: #151820;
+      --ink: #F3F2EE;
+      --ink-2: #B5B4AE;
+      --ink-3: #8A8982;
+      --line: #2E3340;
+      --sh: 0 1px 3px rgba(0,0,0,.35);
     }
 
     * { box-sizing: border-box; }
@@ -69,168 +70,301 @@
       min-height: 100vh;
       line-height: 1.45;
     }
-    .wrap { max-width: 1120px; margin: 0 auto; padding: 28px 20px 64px; }
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 24px 20px 64px; }
 
-    header {
-      display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;
-      align-items: flex-start; margin-bottom: 8px;
+    /* ── Header ─────────────────────────────────────────── */
+    .top {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      margin-bottom: 20px;
     }
     .eyebrow {
-      font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.08em;
+      font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.08em;
       text-transform: uppercase; color: var(--ink-3); margin: 0 0 6px;
     }
     h1 {
-      margin: 0; font-size: 1.85rem; font-weight: 700; letter-spacing: -0.03em;
+      margin: 0; font-size: 1.75rem; font-weight: 700; letter-spacing: -0.03em;
     }
-    .sub { color: var(--ink-3); margin-top: 6px; font-size: 0.95rem; max-width: 40rem; }
-
-    .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-    .toolbar button, .toolbar a, .chip {
-      appearance: none; border: 1px solid var(--line); background: var(--bg-card);
-      color: var(--ink-2); border-radius: 999px; padding: 8px 12px; font-size: 0.85rem;
-      cursor: pointer; text-decoration: none; font-family: var(--sans);
-      box-shadow: var(--sh);
-    }
-    .toolbar button:hover, .toolbar a:hover, .chip:hover { border-color: var(--ink-3); color: var(--ink); }
-    .chip.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
-    [data-theme="dark"] .chip.active { background: var(--ink); color: #111; }
-
-    .tabs {
-      display: flex; gap: 4px; margin: 22px 0 0; flex-wrap: wrap;
-      border-bottom: 1px solid var(--line); padding-bottom: 0;
-    }
-    .tab {
-      appearance: none; border: 1px solid transparent; border-bottom: none;
-      background: transparent; color: var(--ink-3); cursor: pointer;
-      padding: 12px 16px; font-size: 0.95rem; font-weight: 600;
-      border-radius: 10px 10px 0 0; font-family: var(--sans);
-    }
-    .tab:hover { color: var(--ink); background: var(--bg-raised); }
-    .tab.active {
-      color: var(--ink); background: var(--bg-card); border-color: var(--line);
-      position: relative; top: 1px; box-shadow: var(--sh);
-    }
-    .tab .dot {
-      display: inline-block; width: 8px; height: 8px; border-radius: 99px;
-      margin-right: 8px; vertical-align: 1px;
+    .sub { color: var(--ink-3); margin: 6px 0 0; font-size: 0.92rem; max-width: 36rem; }
+    .status-line {
+      font-family: var(--mono); font-size: 0.72rem; color: var(--ink-3); margin-top: 10px;
     }
 
-    .panel { display: none; padding-top: 18px; animation: fade .2s ease; }
-    .panel.active { display: block; }
-    @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
-
-    .grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 12px; margin: 8px 0 20px;
+    .controls {
+      display: flex; flex-direction: column; gap: 10px; align-items: flex-end;
     }
-    .card {
-      background: var(--bg-card); border: 1px solid var(--line); border-radius: var(--r);
-      padding: 14px 16px; box-shadow: var(--sh);
+    .control-row {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end;
     }
-    .card .label {
-      font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.06em;
+    .control-label {
+      font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.06em;
       text-transform: uppercase; color: var(--ink-3);
     }
-    .card .value {
-      font-family: var(--mono); font-size: 1.35rem; font-weight: 600;
-      margin-top: 8px; font-variant-numeric: tabular-nums;
-    }
-    .card .hint { color: var(--ink-3); font-size: 0.8rem; margin-top: 6px; }
 
-    h2 {
-      font-size: 1rem; margin: 22px 0 10px; font-weight: 700; letter-spacing: -0.01em;
+    /* Range filter — segmented control, clearly a filter */
+    .range {
+      display: inline-flex;
+      background: var(--bg-inset);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 3px;
+      gap: 2px;
+    }
+    .range button {
+      appearance: none; border: 0; background: transparent;
+      color: var(--ink-2); font-family: var(--mono); font-size: 0.78rem;
+      font-weight: 500; padding: 7px 12px; border-radius: 6px;
+      cursor: pointer; min-width: 44px;
+    }
+    .range button:hover {
+      color: var(--ink);
+      background: color-mix(in srgb, var(--bg-card) 80%, transparent);
+    }
+    .range button[aria-pressed="true"] {
+      background: var(--bg-card);
+      color: var(--ink);
+      box-shadow: var(--sh);
+      font-weight: 600;
+    }
+
+    /* Settings — theme as icon toggle, not a chip */
+    .theme-toggle {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: var(--bg-card);
+      color: var(--ink-2);
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-size: 0.82rem;
+      font-family: var(--sans);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .theme-toggle:hover { border-color: var(--ink-3); color: var(--ink); }
+    .theme-toggle .ico { font-size: 0.95rem; line-height: 1; }
+
+    /* Nav links — look like links, not filters */
+    .nav-links {
+      display: inline-flex; align-items: center; gap: 14px;
+      font-size: 0.85rem;
+    }
+    .nav-links a, .nav-links button.linkish {
+      appearance: none; border: 0; background: none; padding: 0;
+      color: var(--teal); text-decoration: none; cursor: pointer;
+      font-family: var(--sans); font-size: 0.85rem;
+    }
+    .nav-links a:hover, .nav-links button.linkish:hover {
+      text-decoration: underline; color: var(--ink);
+    }
+    .nav-links .sep { color: var(--line); user-select: none; }
+
+    /* ── Provider tabs as section switcher ───────────────── */
+    .provider-nav {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin: 8px 0 18px;
+    }
+    @media (max-width: 720px) {
+      .provider-nav { grid-template-columns: repeat(2, 1fr); }
+    }
+    .provider-card {
+      appearance: none;
+      text-align: left;
+      border: 1px solid var(--line);
+      background: var(--bg-card);
+      border-radius: 12px;
+      padding: 12px 14px;
+      cursor: pointer;
+      font-family: var(--sans);
+      color: var(--ink);
+      box-shadow: none;
+      transition: border-color .12s ease, box-shadow .12s ease, transform .12s ease;
+    }
+    .provider-card:hover {
+      border-color: color-mix(in srgb, var(--pcolor, var(--ink-3)) 55%, var(--line));
+      /* no dark overlay — keep light */
+      background: var(--bg-card);
+    }
+    .provider-card[aria-selected="true"] {
+      border-color: var(--pcolor, var(--purple));
+      box-shadow: 0 0 0 1px var(--pcolor, var(--purple)), var(--sh);
+      background: var(--bg-card);
+    }
+    .provider-card .pc-name {
+      font-weight: 700; font-size: 0.95rem;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .provider-card .pc-dot {
+      width: 9px; height: 9px; border-radius: 99px;
+      background: var(--pcolor); flex-shrink: 0;
+    }
+    .provider-card .pc-meta {
+      margin-top: 4px; font-family: var(--mono); font-size: 0.7rem;
+      color: var(--ink-3);
+    }
+    .provider-card[aria-selected="true"] .pc-meta { color: var(--ink-2); }
+
+    /* Active section shell */
+    .section {
+      border: 1px solid var(--line);
+      border-top: 3px solid var(--accent);
+      background: var(--bg-card);
+      border-radius: 0 0 14px 14px;
+      padding: 20px 18px 24px;
+      box-shadow: var(--sh);
+      min-height: 320px;
+    }
+    .section-head {
+      display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+      align-items: baseline; margin-bottom: 14px;
+    }
+    .section-head h2 {
+      margin: 0; font-size: 1.15rem; letter-spacing: -0.02em;
+    }
+    .section-blurb {
+      color: var(--ink-2); font-size: 0.9rem; margin: 0 0 16px; max-width: 52rem;
+    }
+
+    .grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px; margin: 0 0 20px;
+    }
+    .metric {
+      background: var(--bg-raised);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+    .metric .label {
+      font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink-3);
+    }
+    .metric .value {
+      font-family: var(--mono); font-size: 1.28rem; font-weight: 600;
+      margin-top: 6px; font-variant-numeric: tabular-nums;
+    }
+    .metric .hint { color: var(--ink-3); font-size: 0.75rem; margin-top: 4px; }
+
+    h3 {
+      font-size: 0.92rem; margin: 22px 0 10px; font-weight: 700;
     }
     .chart-card {
-      background: var(--bg-card); border: 1px solid var(--line); border-radius: var(--r);
-      padding: 16px; box-shadow: var(--sh); margin-bottom: 18px;
+      background: var(--bg-raised);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 8px;
     }
-    .chart-card canvas { max-height: 320px; }
+    .chart-card canvas { max-height: 300px; width: 100% !important; }
 
     table {
-      width: 100%; border-collapse: collapse; background: var(--bg-card);
-      border: 1px solid var(--line); border-radius: var(--r); overflow: hidden;
-      font-size: 0.9rem; box-shadow: var(--sh);
+      width: 100%; border-collapse: collapse;
+      border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
+      font-size: 0.88rem; background: var(--bg-raised);
     }
-    th, td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align: left; }
+    th, td { padding: 9px 12px; border-bottom: 1px solid var(--line); text-align: left; }
     th {
-      font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.05em;
-      text-transform: uppercase; color: var(--ink-3); background: var(--bg-raised);
+      font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.05em;
+      text-transform: uppercase; color: var(--ink-3); background: var(--bg-inset);
     }
     tr:last-child td { border-bottom: 0; }
     td.n, th.n { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
-    td.model { font-family: var(--mono); font-size: 0.85rem; }
+    td.model { font-family: var(--mono); font-size: 0.82rem; }
 
-    .callout {
-      border-left: 3px solid var(--coral); background: var(--bg-card);
-      border-radius: 0 var(--r) var(--r) 0; padding: 12px 14px; margin: 0 0 16px;
-      color: var(--ink-2); font-size: 0.92rem; box-shadow: var(--sh);
-    }
     .pill {
-      display: inline-block; font-family: var(--mono); font-size: 0.65rem;
-      padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line);
+      display: inline-block; font-family: var(--mono); font-size: 0.62rem;
+      padding: 2px 7px; border-radius: 999px; border: 1px solid var(--line);
       color: var(--ink-3); vertical-align: middle; margin-left: 6px;
     }
-    .pill.ok { color: var(--green); border-color: color-mix(in srgb, var(--green) 35%, var(--line)); }
+    .pill.ok { color: var(--green); border-color: color-mix(in srgb, var(--green) 40%, var(--line)); }
     .pill.bad { color: var(--coral); }
 
+    .callout {
+      border-left: 3px solid var(--accent);
+      background: var(--bg-raised);
+      border-radius: 0 8px 8px 0;
+      padding: 10px 12px;
+      margin: 0 0 14px;
+      color: var(--ink-2);
+      font-size: 0.88rem;
+    }
+
     .footer {
-      margin-top: 28px; color: var(--ink-3); font-size: 0.85rem; line-height: 1.55;
+      margin-top: 28px; color: var(--ink-3); font-size: 0.82rem; line-height: 1.55;
     }
     .footer a { color: var(--teal); }
-    .status-line {
-      font-family: var(--mono); font-size: 0.75rem; color: var(--ink-3); margin-top: 10px;
-    }
-    .loading { color: var(--ink-3); padding: 40px 0; text-align: center; }
-    .err { color: var(--coral); padding: 20px; }
+    .loading, .err { padding: 48px 12px; text-align: center; color: var(--ink-3); }
+    .err { color: var(--coral); }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <header>
+    <div class="top">
       <div>
         <p class="eyebrow">Local usage · not vendor invoices</p>
         <h1>AI Dashboard</h1>
-        <p class="sub">Claude, Grok, OpenAI (Codex), Kimi, and GLM — tokens from local session files and stats caches. Light by default.</p>
+        <p class="sub">Tokens from local session files and stats caches. Pick a provider section, then a date range.</p>
         <p class="status-line" id="status">Loading…</p>
       </div>
-      <div class="toolbar">
-        <button type="button" class="chip active" data-days="7">7d</button>
-        <button type="button" class="chip" data-days="30">30d</button>
-        <button type="button" class="chip" data-days="90">90d</button>
-        <button type="button" class="chip" data-days="0">All</button>
-        <button type="button" id="themeBtn" title="Toggle theme">Dark</button>
-        <a href="/claude-activity.html" title="Full Claude insights: heatmap, models, cache, streaks">Claude insights</a>
-        <a href="/api/ai-usage?days=30" id="jsonLink">JSON</a>
-        <button type="button" id="refreshBtn">Refresh</button>
-      </div>
-    </header>
 
-    <nav class="tabs" role="tablist" id="tabs">
-      <button type="button" class="tab active" data-tab="claude" role="tab"><span class="dot" style="background:var(--purple)"></span>Claude</button>
-      <button type="button" class="tab" data-tab="grok" role="tab"><span class="dot" style="background:var(--blue)"></span>Grok</button>
-      <button type="button" class="tab" data-tab="openai" role="tab"><span class="dot" style="background:var(--green)"></span>OpenAI</button>
-      <button type="button" class="tab" data-tab="kimi" role="tab"><span class="dot" style="background:var(--coral)"></span>Kimi</button>
-      <button type="button" class="tab" data-tab="glm" role="tab"><span class="dot" style="background:var(--amber)"></span>GLM</button>
-    </nav>
+      <div class="controls">
+        <div class="control-row">
+          <span class="control-label">Range</span>
+          <div class="range" role="group" aria-label="Date range filter" id="rangeGroup">
+            <button type="button" data-days="7" aria-pressed="true">7d</button>
+            <button type="button" data-days="30" aria-pressed="false">30d</button>
+            <button type="button" data-days="90" aria-pressed="false">90d</button>
+            <button type="button" data-days="0" aria-pressed="false">All</button>
+          </div>
+        </div>
+        <div class="control-row">
+          <span class="control-label">Settings</span>
+          <button type="button" class="theme-toggle" id="themeBtn" aria-label="Toggle colour theme">
+            <span class="ico" id="themeIco">☾</span>
+            <span id="themeLabel">Dark mode</span>
+          </button>
+        </div>
+        <div class="control-row">
+          <span class="control-label">Go to</span>
+          <nav class="nav-links" aria-label="Related pages">
+            <a href="/claude-activity.html">Claude insights</a>
+            <span class="sep">·</span>
+            <a href="/api/ai-usage?days=7" id="jsonLink" target="_blank" rel="noopener">JSON</a>
+            <span class="sep">·</span>
+            <button type="button" class="linkish" id="refreshBtn">Refresh</button>
+          </nav>
+        </div>
+      </div>
+    </div>
+
+    <div class="provider-nav" id="providerNav" role="tablist" aria-label="Provider">
+      <!-- filled by JS -->
+    </div>
 
     <div id="app"><div class="loading">Fetching usage…</div></div>
 
     <div class="footer">
-      <strong>data</strong> = local source found (not a continuous monitor). Page can auto-refresh; OpenAI scan caches ~5 min.<br/>
-      <strong>Tokens:</strong> Claude/Kimi/GLM = model tokens · OpenAI = Codex <code>total_token_usage</code> · Grok = peak context intensity (not an xAI bill).<br/>
-      <strong>Claude insights</strong> (heatmap, streaks, model costs, cache — the original dashboard):
-      <a href="/claude-activity.html">Open Claude Activity</a>
+      <strong>data</strong> = local source found on load (not a live stream). OpenAI scan caches ~5 min.<br/>
+      <strong>Range</strong> filters token totals. <strong>Dark mode</strong> is a display setting.
+      <strong>Claude insights / JSON</strong> navigate elsewhere.<br/>
+      Deep Claude heatmap UI: <a href="/claude-activity.html">Claude Activity</a>
     </div>
   </div>
 
   <script>
-    const COLORS = {
-      claude: '#6B46C1',
-      grok: '#2B6CB0',
-      openai: '#2F855A',
-      kimi: '#C94F3A',
-      glm: '#B07020',
-    };
+    const PROVIDERS = [
+      { key: 'claude', name: 'Claude', color: '#6B46C1' },
+      { key: 'grok', name: 'Grok', color: '#2B6CB0' },
+      { key: 'openai', name: 'OpenAI', color: '#2F855A' },
+      { key: 'kimi', name: 'Kimi', color: '#C94F3A' },
+      { key: 'glm', name: 'GLM', color: '#B07020' },
+    ];
     const TAB_META = {
       claude: {
         title: 'Claude Code',
@@ -238,7 +372,7 @@
       },
       grok: {
         title: 'Grok Build',
-        blurb: 'Grok Build = local client writing ~/.grok/sessions. grok-4.5 = model id on those streams — not the same thing.',
+        blurb: 'Grok Build = local client writing ~/.grok/sessions. Model ids like grok-4.5 are separate from the product surface.',
       },
       openai: {
         title: 'OpenAI / Codex',
@@ -246,15 +380,15 @@
       },
       kimi: {
         title: 'Kimi CLI',
-        blurb: 'Tokens from Kimi CLI session stats. If the selected window is empty, all-time totals are shown.',
+        blurb: 'Tokens from Kimi CLI session stats. Empty windows fall back to all-time totals.',
       },
       glm: {
         title: 'GLM',
-        blurb: 'GLM models as recorded in Claude Code telemetry (e.g. glm-4.7), not a separate desktop app.',
+        blurb: 'GLM models as recorded in Claude Code telemetry (e.g. glm-4.7).',
       },
     };
 
-    let state = { days: 7, tab: 'claude', data: null, chart: null };
+    const state = { days: 7, tab: 'claude', data: null, chart: null, loading: false };
 
     function fmt(n) {
       n = Number(n || 0);
@@ -265,42 +399,44 @@
       return String(Math.round(n));
     }
 
+    function rangeLabel() {
+      return state.days > 0 ? `Last ${state.days} days` : 'All time';
+    }
+
     function pill(p) {
-      if (p && p.available) return '<span class="pill ok" title="Local source found and readable on page load">data</span>';
+      if (p && p.available) {
+        return '<span class="pill ok" title="Local source found on page load">data</span>';
+      }
       return `<span class="pill bad">${(p && p.error) || 'missing'}</span>`;
     }
 
-    function totalsCards(key, p) {
+    function metricCards(key, p) {
       const t = (p && p.totals) || {};
       if (key === 'grok') {
         return `
-          <div class="card"><div class="label">Peak sum</div><div class="value">${fmt(t.peak_sum || t.tokens)}</div><div class="hint">peak context intensity</div></div>
-          <div class="card"><div class="label">Prompts</div><div class="value">${fmt(t.prompts)}</div></div>
-          <div class="card"><div class="label">Sessions</div><div class="value">${fmt(t.sessions)}</div></div>
-          <div class="card"><div class="label">Peak max</div><div class="value">${fmt(t.peak_max)}</div></div>
-          <div class="card"><div class="label">Avg peak</div><div class="value">${fmt(t.avg_peak)}</div></div>`;
+          <div class="metric"><div class="label">Peak sum</div><div class="value">${fmt(t.peak_sum || t.tokens)}</div><div class="hint">peak context</div></div>
+          <div class="metric"><div class="label">Prompts</div><div class="value">${fmt(t.prompts)}</div></div>
+          <div class="metric"><div class="label">Sessions</div><div class="value">${fmt(t.sessions)}</div></div>
+          <div class="metric"><div class="label">Peak max</div><div class="value">${fmt(t.peak_max)}</div></div>
+          <div class="metric"><div class="label">Avg peak</div><div class="value">${fmt(t.avg_peak)}</div></div>`;
       }
       if (key === 'openai') {
         return `
-          <div class="card"><div class="label">Tokens</div><div class="value">${fmt(t.tokens)}</div><div class="hint">session totals in window</div></div>
-          <div class="card"><div class="label">Input</div><div class="value">${fmt(t.input)}</div></div>
-          <div class="card"><div class="label">Output</div><div class="value">${fmt(t.output)}</div></div>
-          <div class="card"><div class="label">Cached in</div><div class="value">${fmt(t.cached_input)}</div></div>
-          <div class="card"><div class="label">Sessions</div><div class="value">${fmt(t.sessions)}</div></div>`;
+          <div class="metric"><div class="label">Tokens</div><div class="value">${fmt(t.tokens)}</div></div>
+          <div class="metric"><div class="label">Input</div><div class="value">${fmt(t.input)}</div></div>
+          <div class="metric"><div class="label">Output</div><div class="value">${fmt(t.output)}</div></div>
+          <div class="metric"><div class="label">Cached in</div><div class="value">${fmt(t.cached_input)}</div></div>
+          <div class="metric"><div class="label">Sessions</div><div class="value">${fmt(t.sessions)}</div></div>`;
       }
-      const ioHint = (p.io_scope === 'estimated_from_lifetime_mix')
+      const ioHint = p.io_scope === 'estimated_from_lifetime_mix'
         ? 'est. from lifetime mix'
-        : (p.io_scope === 'all_time' ? 'all-time breakdown' : '');
+        : (p.io_scope === 'all_time' ? 'all-time' : '');
       return `
-        <div class="card"><div class="label">Tokens</div><div class="value">${fmt(t.tokens)}</div>
-          <div class="hint">in + out + cache</div></div>
-        <div class="card"><div class="label">Input</div><div class="value">${fmt(t.input || 0)}</div>
-          <div class="hint">${ioHint || 'non-cache input'}</div></div>
-        <div class="card"><div class="label">Output</div><div class="value">${fmt(t.output || 0)}</div>
-          <div class="hint">${ioHint || 'completion tokens'}</div></div>
-        <div class="card"><div class="label">Cache</div><div class="value">${fmt(t.cached_input || t.cache_read || 0)}</div>
-          <div class="hint">read + write</div></div>
-        <div class="card"><div class="label">Sessions / msgs</div><div class="value">${fmt(t.sessions || t.messages || t.prompts || 0)}</div></div>`;
+        <div class="metric"><div class="label">Tokens</div><div class="value">${fmt(t.tokens)}</div><div class="hint">in + out + cache</div></div>
+        <div class="metric"><div class="label">Input</div><div class="value">${fmt(t.input || 0)}</div><div class="hint">${ioHint}</div></div>
+        <div class="metric"><div class="label">Output</div><div class="value">${fmt(t.output || 0)}</div><div class="hint">${ioHint}</div></div>
+        <div class="metric"><div class="label">Cache</div><div class="value">${fmt(t.cached_input || t.cache_read || 0)}</div></div>
+        <div class="metric"><div class="label">Sessions / msgs</div><div class="value">${fmt(t.sessions || t.messages || t.prompts || 0)}</div></div>`;
     }
 
     function modelRows(p) {
@@ -315,52 +451,55 @@
 
     function dayRows(p) {
       const days = Object.entries((p && p.by_day) || {}).slice(-30).reverse();
-      if (!days.length) return '<tr><td colspan="4">No daily rows in this window</td></tr>';
+      if (!days.length) return '<tr><td colspan="4">No daily rows in this range</td></tr>';
       return days.map(([d, s]) => {
         const tok = s.tokens ?? s.peak_sum ?? 0;
         return `<tr><td>${d}</td><td class="n">${fmt(s.prompts || s.sessions || 0)}</td><td class="n">${fmt(tok)}</td><td class="n">${fmt(s.output || s.peak_max || 0)}</td></tr>`;
       }).join('');
     }
 
-    function renderPanel(key, p) {
-      const meta = TAB_META[key];
-      const note = (p.notes || []).slice(0, 2).join(' ');
-      const empty = p.window_empty ? '<div class="callout">No activity in the selected window — totals may be all-time.</div>' : '';
-      return `
-        <div class="callout"><strong>${meta.title}</strong> ${pill(p)} — ${meta.blurb}${note ? ' ' + note : ''}</div>
-        ${empty}
-        <div class="grid">${totalsCards(key, p)}</div>
-        <h2>Usage graph</h2>
-        <div class="chart-card"><canvas id="chart-${key}" height="120"></canvas></div>
-        <h2>By model</h2>
-        <table>
-          <thead><tr><th>Model</th><th class="n">Prompts</th><th class="n">Tokens</th></tr></thead>
-          <tbody>${modelRows(p)}</tbody>
-        </table>
-        <h2>By day</h2>
-        <table>
-          <thead><tr><th>Day</th><th class="n">Activity</th><th class="n">Tokens</th><th class="n">Out / peak</th></tr></thead>
-          <tbody>${dayRows(p)}</tbody>
-        </table>
-        <p class="status-line">Source: ${p.source || '—'} · surface: ${p.surface || '—'}</p>
-      `;
+    function providerSnippet(key, p) {
+      const t = (p && p.totals) || {};
+      if (!p || !p.available) return 'no data';
+      if (key === 'grok') return `${fmt(t.peak_sum || t.tokens)} peak · ${fmt(t.prompts)} prompts`;
+      return `${fmt(t.tokens)} tokens`;
+    }
+
+    function renderProviderNav() {
+      const nav = document.getElementById('providerNav');
+      const providers = (state.data && state.data.providers) || {};
+      nav.innerHTML = PROVIDERS.map(({ key, name, color }) => {
+        const p = providers[key] || {};
+        const selected = state.tab === key;
+        return `
+          <button type="button" class="provider-card" role="tab"
+            data-tab="${key}" aria-selected="${selected}"
+            style="--pcolor:${color}">
+            <div class="pc-name"><span class="pc-dot"></span>${name} ${pill(p)}</div>
+            <div class="pc-meta">${providerSnippet(key, p)}</div>
+          </button>`;
+      }).join('');
     }
 
     function destroyChart() {
-      if (state.chart) { state.chart.destroy(); state.chart = null; }
+      if (state.chart) {
+        state.chart.destroy();
+        state.chart = null;
+      }
     }
 
     function drawChart(key, p) {
       destroyChart();
-      const el = document.getElementById('chart-' + key);
+      const el = document.getElementById('mainChart');
       if (!el || typeof Chart === 'undefined') return;
       const by = p.by_day || {};
       const labels = Object.keys(by);
       const tokens = labels.map(d => Number(by[d].tokens || by[d].peak_sum || 0));
       const activity = labels.map(d => Number(by[d].prompts || by[d].sessions || 0));
+      const color = (PROVIDERS.find(x => x.key === key) || {}).color || '#6B46C1';
       const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-      const grid = isDark ? '#2A2F3A' : '#E4E2DD';
-      const tick = isDark ? '#B0B0A8' : '#888880';
+      const grid = isDark ? '#2E3340' : '#E4E2DD';
+      const tick = isDark ? '#8A8982' : '#888880';
 
       state.chart = new Chart(el, {
         type: 'line',
@@ -370,8 +509,8 @@
             {
               label: 'Tokens',
               data: tokens,
-              borderColor: COLORS[key],
-              backgroundColor: COLORS[key] + '22',
+              borderColor: color,
+              backgroundColor: color + '22',
               tension: 0.25,
               fill: true,
               yAxisID: 'y',
@@ -380,7 +519,7 @@
             {
               label: 'Activity',
               data: activity,
-              borderColor: isDark ? '#888' : '#BBBBBB',
+              borderColor: isDark ? '#6B7280' : '#C4C2BA',
               borderDash: [4, 4],
               tension: 0.25,
               yAxisID: 'y1',
@@ -395,9 +534,7 @@
           plugins: {
             legend: { labels: { color: tick, font: { family: 'IBM Plex Mono', size: 11 } } },
             tooltip: {
-              callbacks: {
-                label: (ctx) => `${ctx.dataset.label}: ${fmt(ctx.parsed.y)}`,
-              },
+              callbacks: { label: (ctx) => `${ctx.dataset.label}: ${fmt(ctx.parsed.y)}` },
             },
           },
           scales: {
@@ -419,6 +556,27 @@
       });
     }
 
+    function syncRangeUI() {
+      document.querySelectorAll('#rangeGroup [data-days]').forEach((btn) => {
+        const d = Number(btn.dataset.days);
+        btn.setAttribute('aria-pressed', d === state.days ? 'true' : 'false');
+      });
+    }
+
+    function syncThemeUI() {
+      const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+      document.getElementById('themeIco').textContent = dark ? '☀' : '☾';
+      document.getElementById('themeLabel').textContent = dark ? 'Light mode' : 'Dark mode';
+    }
+
+    function updateUrl() {
+      const q = new URLSearchParams();
+      q.set('tab', state.tab);
+      q.set('days', String(state.days));
+      history.replaceState(null, '', `?${q.toString()}`);
+      document.getElementById('jsonLink').href = `/api/ai-usage?days=${state.days}`;
+    }
+
     function render() {
       const app = document.getElementById('app');
       if (!state.data) {
@@ -426,78 +584,122 @@
         return;
       }
       const providers = state.data.providers || {};
-      const order = ['claude', 'grok', 'openai', 'kimi', 'glm'];
-      app.innerHTML = order.map(key => {
-        const p = providers[key] || { available: false, error: 'missing' };
-        return `<section class="panel ${state.tab === key ? 'active' : ''}" id="panel-${key}" data-panel="${key}">${renderPanel(key, p)}</section>`;
-      }).join('');
+      const key = state.tab;
+      const p = providers[key] || { available: false, error: 'missing' };
+      const meta = TAB_META[key];
+      const color = (PROVIDERS.find(x => x.key === key) || {}).color || '#6B46C1';
+      const note = (p.notes || []).filter(n => !n.startsWith('Tokens from')).slice(0, 1).join(' ');
+      const empty = p.window_empty
+        ? '<div class="callout">No activity in this range — totals may be all-time.</div>'
+        : '';
 
-      document.querySelectorAll('.tab').forEach(t => {
-        t.classList.toggle('active', t.dataset.tab === state.tab);
-      });
-      drawChart(state.tab, providers[state.tab] || {});
+      document.documentElement.style.setProperty('--accent', color);
+      renderProviderNav();
+
+      // One section only — clear that you are in a different place
+      app.innerHTML = `
+        <section class="section" style="--accent:${color}; border-top-color:${color}" aria-labelledby="sectionTitle">
+          <div class="section-head">
+            <h2 id="sectionTitle">${meta.title} ${pill(p)}</h2>
+            <span class="status-line">${rangeLabel()}</span>
+          </div>
+          <p class="section-blurb">${meta.blurb}${note ? ' ' + note : ''}</p>
+          ${empty}
+          <div class="grid">${metricCards(key, p)}</div>
+          <h3>Usage graph</h3>
+          <div class="chart-card"><canvas id="mainChart" height="110"></canvas></div>
+          <h3>By model</h3>
+          <table>
+            <thead><tr><th>Model</th><th class="n">Prompts</th><th class="n">Tokens</th></tr></thead>
+            <tbody>${modelRows(p)}</tbody>
+          </table>
+          <h3>By day</h3>
+          <table>
+            <thead><tr><th>Day</th><th class="n">Activity</th><th class="n">Tokens</th><th class="n">Out / peak</th></tr></thead>
+            <tbody>${dayRows(p)}</tbody>
+          </table>
+          <p class="status-line" style="margin-top:14px">Source: ${p.source || '—'} · ${p.surface || '—'}</p>
+        </section>`;
+
+      drawChart(key, p);
       const gen = state.data.generated_at || '';
       document.getElementById('status').textContent =
-        `${state.days ? 'Last ' + state.days + ' days' : 'All time'} · generated ${gen} · tab ${state.tab}`;
-      document.getElementById('jsonLink').href = `/api/ai-usage?days=${state.days || 0}`;
+        `${rangeLabel()} · ${key} · generated ${gen}${state.loading ? ' · loading…' : ''}`;
     }
 
     async function load() {
-      document.getElementById('status').textContent = 'Loading…';
+      state.loading = true;
+      document.getElementById('status').textContent = `Loading ${rangeLabel()}…`;
       try {
-        const res = await fetch(`/api/ai-usage?days=${state.days || 0}`);
+        const res = await fetch(`/api/ai-usage?days=${encodeURIComponent(String(state.days))}`);
         if (!res.ok) throw new Error('HTTP ' + res.status);
         state.data = await res.json();
+        state.loading = false;
         render();
       } catch (e) {
+        state.loading = false;
         document.getElementById('app').innerHTML =
-          `<div class="err">Failed to load /api/ai-usage — is the dashboard server running?<br/>${e.message}</div>`;
+          `<div class="err">Failed to load /api/ai-usage — is the server running?<br/>${e.message}</div>`;
       }
     }
 
-    document.getElementById('tabs').addEventListener('click', (e) => {
-      const btn = e.target.closest('.tab');
+    // Provider section switch — event delegation (survives re-render)
+    document.getElementById('providerNav').addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-tab]');
       if (!btn) return;
-      state.tab = btn.dataset.tab;
-      history.replaceState(null, '', `?tab=${state.tab}&days=${state.days || 0}`);
+      const next = btn.dataset.tab;
+      if (next === state.tab) return;
+      state.tab = next;
+      updateUrl();
       render();
     });
 
-    document.querySelectorAll('[data-days]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('[data-days]').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        state.days = parseInt(btn.dataset.days, 10);
-        history.replaceState(null, '', `?tab=${state.tab}&days=${state.days || 0}`);
-        load();
-      });
+    // Range filter
+    document.getElementById('rangeGroup').addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-days]');
+      if (!btn) return;
+      const next = Number(btn.dataset.days);
+      if (Number.isNaN(next) || next === state.days) return;
+      state.days = next;
+      syncRangeUI();
+      updateUrl();
+      load();
     });
 
-    document.getElementById('refreshBtn').addEventListener('click', load);
+    document.getElementById('refreshBtn').addEventListener('click', () => load());
 
     document.getElementById('themeBtn').addEventListener('click', () => {
       const root = document.documentElement;
       const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
       root.setAttribute('data-theme', next);
       localStorage.setItem('ai-dashboard-theme', next);
-      document.getElementById('themeBtn').textContent = next === 'dark' ? 'Light' : 'Dark';
+      syncThemeUI();
       if (state.data) render();
     });
 
     (function init() {
       const params = new URLSearchParams(location.search);
-      if (params.get('tab')) state.tab = params.get('tab');
-      if (params.get('days') != null) {
-        state.days = parseInt(params.get('days'), 10);
-        document.querySelectorAll('[data-days]').forEach(b => {
-          b.classList.toggle('active', parseInt(b.dataset.days, 10) === state.days);
-        });
+      if (params.get('tab') && PROVIDERS.some(p => p.key === params.get('tab'))) {
+        state.tab = params.get('tab');
+      }
+      if (params.get('days') != null && params.get('days') !== '') {
+        const d = Number(params.get('days'));
+        if (!Number.isNaN(d)) state.days = d;
       }
       const theme = localStorage.getItem('ai-dashboard-theme') || 'light';
       document.documentElement.setAttribute('data-theme', theme);
-      document.getElementById('themeBtn').textContent = theme === 'dark' ? 'Light' : 'Dark';
+      syncThemeUI();
+      syncRangeUI();
+      updateUrl();
+      // empty nav until data
+      document.getElementById('providerNav').innerHTML = PROVIDERS.map(p =>
+        `<button type="button" class="provider-card" data-tab="${p.key}" aria-selected="${p.key === state.tab}" style="--pcolor:${p.color}">
+          <div class="pc-name"><span class="pc-dot"></span>${p.name}</div>
+          <div class="pc-meta">…</div>
+        </button>`
+      ).join('');
       load();
-      setInterval(load, 90000);
+      setInterval(() => { if (!state.loading) load(); }, 90000);
     })();
   </script>
 </body>
