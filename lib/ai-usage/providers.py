@@ -227,23 +227,32 @@ def collect_claude(days: int | None = 30) -> dict[str, Any]:
         base["totals"]["prompts"] = base["totals"]["messages"]
         base["totals"]["sessions"] = sum(d.get("sessions", 0) for d in by_day.values())
 
-    by_model: dict[str, dict[str, int]] = {}
+    # Full lifetime breakdown lives on modelUsage (input / output / cache).
+    # dailyModelTokens only stores a single total per model per day — no I/O split.
+    by_model_full: dict[str, dict[str, int]] = {}
+    full_input = full_output = full_cache_r = full_cache_w = 0
     for model, u in (data.get("modelUsage") or {}).items():
         if not isinstance(u, dict):
             continue
-        tokens = int(
-            (u.get("inputTokens") or 0)
-            + (u.get("outputTokens") or 0)
-            + (u.get("cacheReadInputTokens") or 0)
-            + (u.get("cacheCreationInputTokens") or 0)
-        )
-        by_model[model] = {
+        inp = int(u.get("inputTokens") or 0)
+        out = int(u.get("outputTokens") or 0)
+        cr = int(u.get("cacheReadInputTokens") or 0)
+        cw = int(u.get("cacheCreationInputTokens") or 0)
+        tokens = inp + out + cr + cw
+        by_model_full[model] = {
             "tokens": tokens,
-            "input": int(u.get("inputTokens") or 0),
-            "output": int(u.get("outputTokens") or 0),
-            "cache_read": int(u.get("cacheReadInputTokens") or 0),
-            "cache_write": int(u.get("cacheCreationInputTokens") or 0),
+            "input": inp,
+            "output": out,
+            "cache_read": cr,
+            "cache_write": cw,
         }
+        full_input += inp
+        full_output += out
+        full_cache_r += cr
+        full_cache_w += cw
+    full_total = full_input + full_output + full_cache_r + full_cache_w
+
+    by_model: dict[str, dict[str, int]] = dict(by_model_full)
     # if days filtered, re-sum models from dailyModelTokens in window only
     if days:
         by_model = {}
@@ -253,8 +262,51 @@ def collect_claude(days: int | None = 30) -> dict[str, Any]:
             if row.get("date") not in allowed:
                 continue
             for model, tok in (row.get("tokensByModel") or {}).items():
-                by_model.setdefault(model, {"tokens": 0})
+                by_model.setdefault(model, {"tokens": 0, "input": 0, "output": 0, "cache_read": 0, "cache_write": 0})
                 by_model[model]["tokens"] += int(tok or 0)
+        # Scale lifetime I/O ratios onto each model's window total so cards aren't 0
+        for model, row in by_model.items():
+            full = by_model_full.get(model)
+            if not full or not full.get("tokens"):
+                continue
+            scale = row["tokens"] / full["tokens"]
+            row["input"] = int(full["input"] * scale)
+            row["output"] = int(full["output"] * scale)
+            row["cache_read"] = int(full["cache_read"] * scale)
+            row["cache_write"] = int(full["cache_write"] * scale)
+
+        # Window totals for I/O: scale lifetime mix by window token sum
+        wt = int(base["totals"]["tokens"] or 0)
+        if full_total > 0 and wt > 0:
+            scale = wt / full_total
+            base["totals"]["input"] = int(full_input * scale)
+            base["totals"]["output"] = int(full_output * scale)
+            base["totals"]["cache_read"] = int(full_cache_r * scale)
+            base["totals"]["cache_write"] = int(full_cache_w * scale)
+            base["totals"]["cached_input"] = base["totals"]["cache_read"] + base["totals"]["cache_write"]
+            base["io_scope"] = "estimated_from_lifetime_mix"
+            base["notes"].append(
+                "Input/output/cache for a date window are estimated from lifetime modelUsage mix "
+                "(daily stats only store totals, not I/O split)."
+            )
+        else:
+            # Fall back to lifetime I/O so cards never show blank zeros when data exists
+            base["totals"]["input"] = full_input
+            base["totals"]["output"] = full_output
+            base["totals"]["cache_read"] = full_cache_r
+            base["totals"]["cache_write"] = full_cache_w
+            base["totals"]["cached_input"] = full_cache_r + full_cache_w
+            base["io_scope"] = "all_time"
+            base["notes"].append(
+                "Input/output shown all-time (selected window has totals only in dailyActivity)."
+            )
+    else:
+        base["totals"]["input"] = full_input
+        base["totals"]["output"] = full_output
+        base["totals"]["cache_read"] = full_cache_r
+        base["totals"]["cache_write"] = full_cache_w
+        base["totals"]["cached_input"] = full_cache_r + full_cache_w
+        base["io_scope"] = "all_time"
 
     base["by_model"] = dict(
         sorted(by_model.items(), key=lambda kv: kv[1].get("tokens", 0), reverse=True)

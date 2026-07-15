@@ -288,10 +288,18 @@
           <div class="card"><div class="label">Cached in</div><div class="value">${fmt(t.cached_input)}</div></div>
           <div class="card"><div class="label">Sessions</div><div class="value">${fmt(t.sessions)}</div></div>`;
       }
+      const ioHint = (p.io_scope === 'estimated_from_lifetime_mix')
+        ? 'est. from lifetime mix'
+        : (p.io_scope === 'all_time' ? 'all-time breakdown' : '');
       return `
-        <div class="card"><div class="label">Tokens</div><div class="value">${fmt(t.tokens)}</div></div>
-        <div class="card"><div class="label">Input</div><div class="value">${fmt(t.input || 0)}</div></div>
-        <div class="card"><div class="label">Output</div><div class="value">${fmt(t.output || 0)}</div></div>
+        <div class="card"><div class="label">Tokens</div><div class="value">${fmt(t.tokens)}</div>
+          <div class="hint">in + out + cache</div></div>
+        <div class="card"><div class="label">Input</div><div class="value">${fmt(t.input || 0)}</div>
+          <div class="hint">${ioHint || 'non-cache input'}</div></div>
+        <div class="card"><div class="label">Output</div><div class="value">${fmt(t.output || 0)}</div>
+          <div class="hint">${ioHint || 'completion tokens'}</div></div>
+        <div class="card"><div class="label">Cache</div><div class="value">${fmt(t.cached_input || t.cache_read || 0)}</div>
+          <div class="hint">read + write</div></div>
         <div class="card"><div class="label">Sessions / msgs</div><div class="value">${fmt(t.sessions || t.messages || t.prompts || 0)}</div></div>`;
     }
 
